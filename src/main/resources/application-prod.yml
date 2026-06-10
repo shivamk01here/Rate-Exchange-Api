@@ -1,0 +1,9 @@
+server:
+  port: 8080
+
+providers:
+  configs:
+    EXCHANGE_RATE_API:
+      baseUrl: https://api.exchangerate-api.com
+    OPEN_EXCHANGE_RATES:
+      baseUrl: https://openexchangerates.com

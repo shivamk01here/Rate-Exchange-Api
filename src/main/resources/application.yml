@@ -1,0 +1,17 @@
+server:
+  port: 8080
+
+spring:
+  application:
+    name: exchange-rate-service
+
+logging:
+  level:
+    com.example.exchangerate: DEBUG
+
+providers:
+  configs:
+    EXCHANGE_RATE_API:
+      baseUrl: https://api.exchangerate-api.example.com
+    OPEN_EXCHANGE_RATES:
+      baseUrl: https://openexchangerates.example.com
