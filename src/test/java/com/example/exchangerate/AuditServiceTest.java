@@ -99,14 +99,15 @@ public class AuditServiceTest {
     @Test
     void getHistoryByTimeRange_filtersCorrectly() {
         recordConversion("USD", "INR", "SUCCESS");
-        sleepQuietly(100);
+        sleepQuietly(200);
         recordConversion("EUR", "USD", "FAILED");
 
+        sleepQuietly(200);
         Instant mid = Instant.now();
-        sleepQuietly(100);
+        sleepQuietly(200);
         recordConversion("GBP", "USD", "SUCCESS");
 
-        List<ConversionRecord> afterMid = auditService.getHistoryByTimeRange(mid, Instant.now());
+        List<ConversionRecord> afterMid = auditService.getHistoryByTimeRange(mid, Instant.now().plusMillis(1));
         assertEquals(1, afterMid.size());
         assertEquals("GBP", afterMid.get(0).getFromCurrency());
     }
@@ -142,9 +143,11 @@ public class AuditServiceTest {
     @Test
     void cleanupOldRecords_removesExpiredRecords() {
         recordConversion("USD", "INR", "SUCCESS");
+        sleepQuietly(200);
         recordConversion("EUR", "USD", "SUCCESS");
+        sleepQuietly(200);
 
-        int removed = auditService.cleanupOldRecords(Duration.ZERO);
+        int removed = auditService.cleanupOldRecords(Duration.ofMillis(100));
         assertEquals(2, removed);
 
         assertEquals(0, auditService.getTotalConversions());

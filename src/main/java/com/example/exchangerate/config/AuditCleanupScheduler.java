@@ -8,7 +8,6 @@ import org.springframework.stereotype.Component;
 
 @Slf4j
 @Component
-@EnableScheduling
 @RequiredArgsConstructor
 public class AuditCleanupScheduler {
 
