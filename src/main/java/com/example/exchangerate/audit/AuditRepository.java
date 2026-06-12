@@ -81,6 +81,10 @@ public class AuditRepository {
         return records.stream().filter(r -> status.equals(r.getStatus())).count();
     }
 
+    public long countByStatusStartingWith(String prefix) {
+        return records.stream().filter(r -> r.getStatus() != null && r.getStatus().startsWith(prefix)).count();
+    }
+
     public Map<String, Long> getPopularPairs(int topN) {
         return records.stream()
                 .collect(Collectors.groupingBy(
