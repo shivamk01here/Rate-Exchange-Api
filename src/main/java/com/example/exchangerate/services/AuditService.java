@@ -1,6 +1,7 @@
 package com.example.exchangerate.services;
 
 import com.example.exchangerate.audit.AuditRepository;
+import com.example.exchangerate.config.AuditConfig;
 import com.example.exchangerate.models.ConversionRecord;
 import com.example.exchangerate.models.ExchangeRateResponse;
 import com.example.exchangerate.models.ProviderCodes;
@@ -18,6 +19,7 @@ import java.util.Map;
 public class AuditService {
 
     private final AuditRepository auditRepository;
+    private final AuditConfig auditConfig;
 
     public ConversionRecord recordConversion(ExchangeRateResponse response) {
         ConversionRecord record = ConversionRecord.builder()
