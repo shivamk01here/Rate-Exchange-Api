@@ -7,3 +7,7 @@ providers:
       baseUrl: https://api.exchangerate-api.com
     OPEN_EXCHANGE_RATES:
       baseUrl: https://openexchangerates.com
+
+audit:
+  retention: 90d
+  default-history-limit: 200
