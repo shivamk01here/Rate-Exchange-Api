@@ -19,6 +19,7 @@ import java.util.concurrent.CompletableFuture;
 public class ExchangeRateOrchestrationService {
 
     private final ProviderFactory providerFactory;
+    private final AuditService auditService;
 
     private static final List<ProviderCodes> ROUTING_ORDER = List.of(
             ProviderCodes.EXCHANGE_RATE_API,
@@ -35,8 +36,9 @@ public class ExchangeRateOrchestrationService {
     private CompletableFuture<ExchangeRateResponse> tryProviders(ExchangeRateRequest request,
             int index) {
         if (index >= ROUTING_ORDER.size()) {
-            return CompletableFuture.completedFuture(
-                    ExchangeRateResponse.failed(null, request, "ALL_PROVIDERS_FAILED"));
+            ExchangeRateResponse failed = ExchangeRateResponse.failed(null, request, "ALL_PROVIDERS_FAILED");
+            auditService.recordConversion(failed);
+            return CompletableFuture.completedFuture(failed);
         }
 
         ProviderCodes code = ROUTING_ORDER.get(index);
@@ -46,6 +48,7 @@ public class ExchangeRateOrchestrationService {
 
         return provider.fetchRate(request)
                 .thenCompose(response -> {
+                    auditService.recordConversion(response);
                     if ("SUCCESS".equals(response.getStatus())) {
                         log.info("Provider {} succeeded: rate={}", code, response.getRate());
                         return CompletableFuture.completedFuture(response);
