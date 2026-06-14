@@ -19,19 +19,23 @@ import java.util.concurrent.ConcurrentHashMap;
 public class RateCacheService {
 
     private final CacheConfig cacheConfig;
+    private final CacheMetricsCollector metrics;
     private final ConcurrentHashMap<String, CacheEntry<ExchangeRateResponse>> cache = new ConcurrentHashMap<>();
 
     public ExchangeRateResponse get(String fromCurrency, String toCurrency) {
         String key = cacheKey(fromCurrency, toCurrency);
         CacheEntry<ExchangeRateResponse> entry = cache.get(key);
         if (entry == null) {
+            metrics.recordMiss();
             return null;
         }
         if (entry.isExpired()) {
             cache.remove(key);
+            metrics.recordEviction();
             log.debug("Cache entry for {} expired and removed", key);
             return null;
         }
+        metrics.recordHit();
         log.debug("Cache hit for {}", key);
         return entry.getValue();
     }
@@ -49,12 +53,14 @@ public class RateCacheService {
                 .expiresAt(now.plus(cacheConfig.getTtl()))
                 .build();
         cache.put(key, entry);
+        metrics.recordPut();
         log.debug("Cached rate for {} with TTL {}", key, cacheConfig.getTtl());
     }
 
     public void evict(String fromCurrency, String toCurrency) {
         String key = cacheKey(fromCurrency, toCurrency);
         cache.remove(key);
+        metrics.recordEviction();
         log.info("Evicted cache entry for {}", key);
     }
 
