@@ -11,3 +11,8 @@ providers:
 audit:
   retention: 7d
   default-history-limit: 100
+
+cache:
+  ttl: 1m
+  max-size: 500
+  eviction-interval-ms: 15000
