@@ -19,3 +19,11 @@ providers:
 audit:
   retention: 30d
   default-history-limit: 50
+
+cache:
+  ttl: 5m
+  max-size: 1000
+  eviction-interval-ms: 30000
+
+health:
+  enabled: true
