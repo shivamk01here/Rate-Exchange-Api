@@ -16,3 +16,6 @@ cache:
   ttl: 1m
   max-size: 500
   eviction-interval-ms: 15000
+
+health:
+  enabled: true
