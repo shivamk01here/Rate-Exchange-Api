@@ -15,14 +15,16 @@ public class CurrencyCacheService {
     private static final long CACHE_TTL_SECONDS = 300;
 
     private final CurrencyService currencyService;
+    private final CurrencyMetricsCollector metrics;
 
     private Collection<CurrencyInfo> cachedList;
     private Instant listExpiresAt;
 
     private final ConcurrentHashMap<String, CachedCurrency> currencyCache = new ConcurrentHashMap<>();
 
-    public CurrencyCacheService(CurrencyService currencyService) {
+    public CurrencyCacheService(CurrencyService currencyService, CurrencyMetricsCollector metrics) {
         this.currencyService = currencyService;
+        this.metrics = metrics;
     }
 
     public Collection<CurrencyInfo> getSupportedCurrencies() {
@@ -35,11 +37,14 @@ public class CurrencyCacheService {
     }
 
     public CurrencyInfo getCurrency(String code) {
+        metrics.recordLookup();
         String key = code != null ? code.toUpperCase() : "";
         CachedCurrency cached = currencyCache.get(key);
         if (cached != null && !Instant.now().isAfter(cached.expiresAt)) {
+            metrics.recordCacheHit();
             return cached.currency;
         }
+        metrics.recordCacheMiss();
         CurrencyInfo currency = currencyService.getCurrency(code);
         if (currency != null) {
             currencyCache.put(key, new CachedCurrency(currency, Instant.now().plusSeconds(CACHE_TTL_SECONDS)));
