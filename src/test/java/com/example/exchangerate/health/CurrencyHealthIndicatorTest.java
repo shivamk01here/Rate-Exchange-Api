@@ -49,9 +49,10 @@ class CurrencyHealthIndicatorTest {
     }
 
     @Test
-    void checkHealth_tracksLookupsAfterQuery() {
-        currencyHealthIndicator.checkHealth();
+    void checkHealth_initialMetricsAreZero() {
         ComponentHealth health = currencyHealthIndicator.checkHealth();
-        assertTrue((Long) health.getDetails().get("totalLookups") > 0);
+        assertEquals(0L, health.getDetails().get("totalLookups"));
+        assertEquals(0L, health.getDetails().get("cacheHits"));
+        assertEquals(0L, health.getDetails().get("cacheMisses"));
     }
 }
