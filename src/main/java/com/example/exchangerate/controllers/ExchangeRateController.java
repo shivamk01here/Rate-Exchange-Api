@@ -2,6 +2,7 @@ package com.example.exchangerate.controllers;
 
 import com.example.exchangerate.models.ExchangeRateRequest;
 import com.example.exchangerate.models.ExchangeRateResponse;
+import com.example.exchangerate.services.CurrencyCacheService;
 import com.example.exchangerate.services.ExchangeRateOrchestrationService;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -25,15 +26,26 @@ import java.util.concurrent.CompletableFuture;
 public class ExchangeRateController {
 
     private final ExchangeRateOrchestrationService orchestrationService;
+    private final CurrencyCacheService currencyCacheService;
 
     @PostMapping(value = "/rates", consumes = MediaType.APPLICATION_JSON_VALUE)
     public CompletableFuture<ExchangeRateResponse> getRate(
             @Valid @RequestBody ExchangeRateRequest request,
             ServerWebExchange exchange) {
 
+        String from = request.getFromCurrency();
+        String to = request.getToCurrency();
+
+        if (!currencyCacheService.isSupported(from)) {
+            throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Unsupported currency: " + from);
+        }
+        if (!currencyCacheService.isSupported(to)) {
+            throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Unsupported currency: " + to);
+        }
+
         String traceId = MDC.get("X-B3-TraceId");
         log.info("Received rate request: {}->{} amount={} | traceId={}",
-                request.getFromCurrency(), request.getToCurrency(),
+                from, to,
                 request.getAmount(), traceId);
 
         return orchestrationService.getRate(request)
@@ -53,6 +65,15 @@ public class ExchangeRateController {
             ServerWebExchange exchange) {
 
         ExchangeRateRequest request = ExchangeRateRequest.fromPipeFormat(pipeRequest);
+
+        if (!currencyCacheService.isSupported(request.getFromCurrency())) {
+            throw new ResponseStatusException(HttpStatus.BAD_REQUEST,
+                    "Unsupported currency: " + request.getFromCurrency());
+        }
+        if (!currencyCacheService.isSupported(request.getToCurrency())) {
+            throw new ResponseStatusException(HttpStatus.BAD_REQUEST,
+                    "Unsupported currency: " + request.getToCurrency());
+        }
 
         return Mono.fromFuture(
                 orchestrationService.getRate(request)).flatMap(response -> {
