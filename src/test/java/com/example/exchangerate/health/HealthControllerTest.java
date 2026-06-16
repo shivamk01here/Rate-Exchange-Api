@@ -1,5 +1,7 @@
 package com.example.exchangerate.health;
 
+import com.example.exchangerate.controllers.HealthController;
+import com.example.exchangerate.health.HealthCheckService;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 
