@@ -1,5 +1,7 @@
 package com.example.exchangerate.controllers;
 
+import com.example.exchangerate.models.BatchConversionRequest;
+import com.example.exchangerate.models.BatchConversionResponse;
 import com.example.exchangerate.models.ExchangeRateRequest;
 import com.example.exchangerate.models.ExchangeRateResponse;
 import com.example.exchangerate.services.CurrencyCacheService;
@@ -18,6 +20,7 @@ import reactor.core.publisher.Mono;
 import javax.validation.Valid;
 import java.net.URI;
 import java.util.concurrent.CompletableFuture;
+import java.util.stream.Collectors;
 
 @Slf4j
 @RestController
@@ -57,6 +60,29 @@ public class ExchangeRateController {
                     }
                     return response;
                 });
+    }
+
+    @PostMapping(value = "/rates/batch")
+    public CompletableFuture<BatchConversionResponse> getBatchRates(
+            @Valid @RequestBody BatchConversionRequest batchRequest) {
+
+        String from = batchRequest.getFromCurrency();
+        if (!currencyCacheService.isSupported(from)) {
+            throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Unsupported currency: " + from);
+        }
+
+        String unsupported = batchRequest.getToCurrencies().stream()
+                .filter(c -> !currencyCacheService.isSupported(c))
+                .collect(Collectors.joining(", "));
+        if (!unsupported.isEmpty()) {
+            throw new ResponseStatusException(HttpStatus.BAD_REQUEST,
+                    "Unsupported currencies: " + unsupported);
+        }
+
+        log.info("Received batch rate request: {} {} -> {}",
+                batchRequest.getAmount(), from, batchRequest.getToCurrencies());
+
+        return orchestrationService.getBatchRates(batchRequest);
     }
 
     @PostMapping(value = "/rates/pipe", consumes = MediaType.TEXT_PLAIN_VALUE)
