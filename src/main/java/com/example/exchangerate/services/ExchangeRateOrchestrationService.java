@@ -1,5 +1,8 @@
 package com.example.exchangerate.services;
 
+import com.example.exchangerate.models.BatchConversionRequest;
+import com.example.exchangerate.models.BatchConversionResponse;
+import com.example.exchangerate.models.BatchRateResult;
 import com.example.exchangerate.models.ExchangeRateRequest;
 import com.example.exchangerate.models.ExchangeRateResponse;
 import com.example.exchangerate.models.ProviderCodes;
@@ -12,6 +15,7 @@ import org.springframework.stereotype.Service;
 
 import java.util.List;
 import java.util.concurrent.CompletableFuture;
+import java.util.stream.Collectors;
 
 @Slf4j
 @Service
@@ -40,6 +44,49 @@ public class ExchangeRateOrchestrationService {
         }
 
         return tryProviders(request, 0);
+    }
+
+    public CompletableFuture<BatchConversionResponse> getBatchRates(BatchConversionRequest batchRequest) {
+        log.info("Processing batch conversion: {} {} -> {} currencies",
+                batchRequest.getAmount(), batchRequest.getFromCurrency(),
+                batchRequest.getToCurrencies().size());
+
+        List<CompletableFuture<BatchRateResult>> futures = batchRequest.getToCurrencies().stream()
+                .map(toCurrency -> {
+                    ExchangeRateRequest singleRequest = ExchangeRateRequest.builder()
+                            .fromCurrency(batchRequest.getFromCurrency())
+                            .toCurrency(toCurrency)
+                            .amount(batchRequest.getAmount())
+                            .build();
+                    return getRate(singleRequest)
+                            .thenApply(response -> BatchRateResult.builder()
+                                    .toCurrency(toCurrency)
+                                    .rate(response.getRate())
+                                    .convertedAmount(response.getConvertedAmount())
+                                    .status(response.getStatus())
+                                    .build())
+                            .exceptionally(e -> {
+                                log.warn("Batch conversion failed for {}->{}: {}",
+                                        batchRequest.getFromCurrency(), toCurrency, e.getMessage());
+                                return BatchRateResult.builder()
+                                        .toCurrency(toCurrency)
+                                        .status("FAILED_PROVIDER_ERROR")
+                                        .build();
+                            });
+                })
+                .collect(Collectors.toList());
+
+        return CompletableFuture.allOf(futures.toArray(new CompletableFuture[0]))
+                .thenApply(v -> {
+                    List<BatchRateResult> results = futures.stream()
+                            .map(CompletableFuture::join)
+                            .collect(Collectors.toList());
+                    return BatchConversionResponse.builder()
+                            .fromCurrency(batchRequest.getFromCurrency())
+                            .amount(batchRequest.getAmount())
+                            .results(results)
+                            .build();
+                });
     }
 
     private CompletableFuture<ExchangeRateResponse> tryProviders(ExchangeRateRequest request,
