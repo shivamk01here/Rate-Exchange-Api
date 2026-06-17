@@ -21,7 +21,6 @@ import java.util.List;
 import java.util.concurrent.CompletableFuture;
 
 import static org.junit.jupiter.api.Assertions.*;
-import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
 
@@ -31,6 +30,26 @@ class ExchangeRateOrchestrationServiceTest {
     private ProviderFactory providerFactory;
     private RateCacheService rateCacheService;
     private AuditRepository auditRepository;
+
+    private static class StubProvider extends ExchangeRateProvider {
+        private final ProviderCodes code;
+        private final CompletableFuture<ExchangeRateResponse> response;
+
+        StubProvider(ProviderCodes code, CompletableFuture<ExchangeRateResponse> response) {
+            this.code = code;
+            this.response = response;
+        }
+
+        @Override
+        public ProviderCodes getProviderCode() {
+            return code;
+        }
+
+        @Override
+        protected CompletableFuture<ExchangeRateResponse> doFetchRate(ExchangeRateRequest request) {
+            return response;
+        }
+    }
 
     @BeforeEach
     void setUp() {
@@ -43,10 +62,6 @@ class ExchangeRateOrchestrationServiceTest {
 
     @Test
     void getBatchRates_returnsResultsForAllCurrencies() {
-        ExchangeRateProvider mockProvider = mock(ExchangeRateProvider.class);
-        when(providerFactory.getProvider(ProviderCodes.EXCHANGE_RATE_API)).thenReturn(mockProvider);
-        when(providerFactory.getProvider(ProviderCodes.OPEN_EXCHANGE_RATES)).thenReturn(mockProvider);
-
         ExchangeRateResponse success = ExchangeRateResponse.builder()
                 .fromCurrency("USD").toCurrency("INR")
                 .rate(new BigDecimal("83.45"))
@@ -55,8 +70,10 @@ class ExchangeRateOrchestrationServiceTest {
                 .providerCode(ProviderCodes.EXCHANGE_RATE_API)
                 .build();
 
-        when(mockProvider.fetchRate(any(ExchangeRateRequest.class)))
-                .thenReturn(CompletableFuture.completedFuture(success));
+        ExchangeRateProvider stubProvider = new StubProvider(
+                ProviderCodes.EXCHANGE_RATE_API, CompletableFuture.completedFuture(success));
+        when(providerFactory.getProvider(ProviderCodes.EXCHANGE_RATE_API)).thenReturn(stubProvider);
+        when(providerFactory.getProvider(ProviderCodes.OPEN_EXCHANGE_RATES)).thenReturn(stubProvider);
 
         BatchConversionRequest batchRequest = BatchConversionRequest.builder()
                 .fromCurrency("USD")
@@ -74,10 +91,6 @@ class ExchangeRateOrchestrationServiceTest {
 
     @Test
     void getBatchRates_handlesPartialFailures() {
-        ExchangeRateProvider mockProvider = mock(ExchangeRateProvider.class);
-        when(providerFactory.getProvider(ProviderCodes.EXCHANGE_RATE_API)).thenReturn(mockProvider);
-        when(providerFactory.getProvider(ProviderCodes.OPEN_EXCHANGE_RATES)).thenReturn(mockProvider);
-
         ExchangeRateResponse success = ExchangeRateResponse.builder()
                 .fromCurrency("USD").toCurrency("INR")
                 .rate(new BigDecimal("83.45"))
@@ -87,13 +100,16 @@ class ExchangeRateOrchestrationServiceTest {
                 .build();
 
         ExchangeRateResponse failed = ExchangeRateResponse.failed(
-                null,
+                ProviderCodes.EXCHANGE_RATE_API,
                 ExchangeRateRequest.builder().fromCurrency("USD").toCurrency("XYZ").amount(new BigDecimal("100")).build(),
                 "UNSUPPORTED_CURRENCY");
 
-        when(mockProvider.fetchRate(any(ExchangeRateRequest.class)))
-                .thenReturn(CompletableFuture.completedFuture(success))
-                .thenReturn(CompletableFuture.completedFuture(failed));
+        ExchangeRateProvider stubProvider = new StubProvider(
+                ProviderCodes.EXCHANGE_RATE_API, CompletableFuture.completedFuture(success));
+        ExchangeRateProvider failProvider = new StubProvider(
+                ProviderCodes.OPEN_EXCHANGE_RATES, CompletableFuture.completedFuture(failed));
+        when(providerFactory.getProvider(ProviderCodes.EXCHANGE_RATE_API)).thenReturn(stubProvider);
+        when(providerFactory.getProvider(ProviderCodes.OPEN_EXCHANGE_RATES)).thenReturn(failProvider);
 
         BatchConversionRequest batchRequest = BatchConversionRequest.builder()
                 .fromCurrency("USD")
@@ -104,14 +120,11 @@ class ExchangeRateOrchestrationServiceTest {
         BatchConversionResponse response = orchestrationService.getBatchRates(batchRequest).join();
 
         assertEquals(2, response.getResults().size());
+        assertEquals("SUCCESS", response.getResults().get(0).getStatus());
     }
 
     @Test
     void getBatchRates_withSingleCurrency_returnsSingleResult() {
-        ExchangeRateProvider mockProvider = mock(ExchangeRateProvider.class);
-        when(providerFactory.getProvider(ProviderCodes.EXCHANGE_RATE_API)).thenReturn(mockProvider);
-        when(providerFactory.getProvider(ProviderCodes.OPEN_EXCHANGE_RATES)).thenReturn(mockProvider);
-
         ExchangeRateResponse success = ExchangeRateResponse.builder()
                 .fromCurrency("USD").toCurrency("INR")
                 .rate(new BigDecimal("83.45"))
@@ -120,8 +133,10 @@ class ExchangeRateOrchestrationServiceTest {
                 .providerCode(ProviderCodes.EXCHANGE_RATE_API)
                 .build();
 
-        when(mockProvider.fetchRate(any(ExchangeRateRequest.class)))
-                .thenReturn(CompletableFuture.completedFuture(success));
+        ExchangeRateProvider stubProvider = new StubProvider(
+                ProviderCodes.EXCHANGE_RATE_API, CompletableFuture.completedFuture(success));
+        when(providerFactory.getProvider(ProviderCodes.EXCHANGE_RATE_API)).thenReturn(stubProvider);
+        when(providerFactory.getProvider(ProviderCodes.OPEN_EXCHANGE_RATES)).thenReturn(stubProvider);
 
         BatchConversionRequest batchRequest = BatchConversionRequest.builder()
                 .fromCurrency("USD")

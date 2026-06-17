@@ -25,5 +25,8 @@ cache:
   max-size: 1000
   eviction-interval-ms: 30000
 
+batch:
+  max-size: 10
+
 health:
   enabled: true

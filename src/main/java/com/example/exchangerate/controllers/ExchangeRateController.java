@@ -1,5 +1,6 @@
 package com.example.exchangerate.controllers;
 
+import com.example.exchangerate.config.BatchConfig;
 import com.example.exchangerate.models.BatchConversionRequest;
 import com.example.exchangerate.models.BatchConversionResponse;
 import com.example.exchangerate.models.ExchangeRateRequest;
@@ -30,6 +31,7 @@ public class ExchangeRateController {
 
     private final ExchangeRateOrchestrationService orchestrationService;
     private final CurrencyCacheService currencyCacheService;
+    private final BatchConfig batchConfig;
 
     @PostMapping(value = "/rates", consumes = MediaType.APPLICATION_JSON_VALUE)
     public CompletableFuture<ExchangeRateResponse> getRate(
@@ -69,6 +71,11 @@ public class ExchangeRateController {
         String from = batchRequest.getFromCurrency();
         if (!currencyCacheService.isSupported(from)) {
             throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Unsupported currency: " + from);
+        }
+
+        if (batchRequest.getToCurrencies().size() > batchConfig.getMaxSize()) {
+            throw new ResponseStatusException(HttpStatus.BAD_REQUEST,
+                    "Batch size exceeds maximum of " + batchConfig.getMaxSize());
         }
 
         String unsupported = batchRequest.getToCurrencies().stream()
