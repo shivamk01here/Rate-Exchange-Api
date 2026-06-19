@@ -5,8 +5,12 @@ import com.example.exchangerate.models.HistoryPageRequest;
 import com.example.exchangerate.models.HistoryPageResponse;
 import com.example.exchangerate.models.ProviderCodes;
 import com.example.exchangerate.services.AuditService;
+import com.example.exchangerate.services.CsvExportService;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.http.HttpHeaders;
+import org.springframework.http.MediaType;
+import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
 import java.time.Instant;
@@ -20,6 +24,7 @@ import java.util.Map;
 public class AuditController {
 
     private final AuditService auditService;
+    private final CsvExportService csvExportService;
 
     @GetMapping("/history")
     public List<ConversionRecord> getHistory(
@@ -75,5 +80,27 @@ public class AuditController {
                 "successCount", auditService.getSuccessCount(),
                 "failureCount", auditService.getFailureCount(),
                 "popularPairs", auditService.getPopularPairs(5));
+    }
+
+    @GetMapping("/export/csv")
+    public ResponseEntity<String> exportCsv(
+            @RequestParam(required = false) String fromCurrency,
+            @RequestParam(required = false) String toCurrency,
+            @RequestParam(required = false) Long fromEpochMillis,
+            @RequestParam(required = false) Long toEpochMillis) {
+        HistoryPageRequest request = HistoryPageRequest.builder()
+                .page(0)
+                .size(Integer.MAX_VALUE)
+                .fromCurrency(fromCurrency)
+                .toCurrency(toCurrency)
+                .fromEpochMillis(fromEpochMillis)
+                .toEpochMillis(toEpochMillis)
+                .build();
+        HistoryPageResponse page = auditService.getHistoryPage(request);
+        String csv = csvExportService.exportToCsv(page.getRecords());
+        return ResponseEntity.ok()
+                .header(HttpHeaders.CONTENT_DISPOSITION, "attachment; filename=conversion-history.csv")
+                .contentType(MediaType.parseMediaType("text/csv"))
+                .body(csv);
     }
 }
