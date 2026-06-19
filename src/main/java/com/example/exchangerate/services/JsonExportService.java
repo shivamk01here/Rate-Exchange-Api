@@ -23,8 +23,15 @@ public class JsonExportService {
     }
 
     public String exportToJson(List<ConversionRecord> records) {
+        return exportToJson(records, false);
+    }
+
+    public String exportToJson(List<ConversionRecord> records, boolean prettyPrint) {
         try {
-            String json = objectMapper.writeValueAsString(
+            ObjectMapper mapper = prettyPrint
+                    ? objectMapper.writerWithDefaultPrettyPrinter()
+                    : objectMapper;
+            String json = mapper.writeValueAsString(
                     records != null ? records : List.of());
             log.info("Exported {} conversion records to JSON", records != null ? records.size() : 0);
             return json;
