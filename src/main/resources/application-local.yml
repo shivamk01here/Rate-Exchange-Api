@@ -22,3 +22,9 @@ batch:
 
 health:
   enabled: true
+
+export:
+  json:
+    pretty-print: true
+    date-format: iso
+    include-null-fields: false

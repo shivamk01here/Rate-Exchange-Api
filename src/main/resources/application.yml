@@ -30,3 +30,11 @@ batch:
 
 health:
   enabled: true
+
+export:
+  max-export-size: 10000
+  filename: conversion-history
+  json:
+    pretty-print: false
+    date-format: iso
+    include-null-fields: false

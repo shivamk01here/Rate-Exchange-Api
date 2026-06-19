@@ -22,3 +22,10 @@ batch:
 
 health:
   enabled: true
+
+export:
+  max-export-size: 50000
+  json:
+    pretty-print: true
+    date-format: iso
+    include-null-fields: false
