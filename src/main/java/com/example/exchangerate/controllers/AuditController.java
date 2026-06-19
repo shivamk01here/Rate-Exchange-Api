@@ -86,12 +86,15 @@ public class AuditController {
                 "popularPairs", auditService.getPopularPairs(5));
     }
 
-    @GetMapping("/export/csv")
-    public ResponseEntity<String> exportCsv(
+    @GetMapping("/export")
+    public ResponseEntity<String> exportHistory(
+            @RequestParam(defaultValue = "CSV") ExportFormat format,
             @RequestParam(required = false) String fromCurrency,
             @RequestParam(required = false) String toCurrency,
             @RequestParam(required = false) Long fromEpochMillis,
-            @RequestParam(required = false) Long toEpochMillis) {
+            @RequestParam(required = false) Long toEpochMillis,
+            @RequestParam(defaultValue = "false") boolean pretty,
+            @RequestParam(required = false) Set<String> fields) {
         HistoryPageRequest request = HistoryPageRequest.builder()
                 .page(0)
                 .size(Integer.MAX_VALUE)
@@ -101,11 +104,28 @@ public class AuditController {
                 .toEpochMillis(toEpochMillis)
                 .build();
         HistoryPageResponse page = auditService.getHistoryPage(request);
+        if (format == ExportFormat.JSON) {
+            String json = jsonExportService.exportToJson(page.getRecords(), pretty, fields);
+            return ResponseEntity.ok()
+                    .header(HttpHeaders.CONTENT_DISPOSITION, "attachment; filename=conversion-history.json")
+                    .contentType(MediaType.APPLICATION_JSON)
+                    .body(json);
+        }
         String csv = csvExportService.exportToCsv(page.getRecords());
         return ResponseEntity.ok()
                 .header(HttpHeaders.CONTENT_DISPOSITION, "attachment; filename=conversion-history.csv")
                 .contentType(MediaType.parseMediaType("text/csv"))
                 .body(csv);
+    }
+
+    @GetMapping("/export/csv")
+    public ResponseEntity<String> exportCsv(
+            @RequestParam(required = false) String fromCurrency,
+            @RequestParam(required = false) String toCurrency,
+            @RequestParam(required = false) Long fromEpochMillis,
+            @RequestParam(required = false) Long toEpochMillis) {
+        return exportHistory(ExportFormat.CSV, fromCurrency, toCurrency,
+                fromEpochMillis, toEpochMillis, false, null);
     }
 
     @GetMapping("/export/json")
