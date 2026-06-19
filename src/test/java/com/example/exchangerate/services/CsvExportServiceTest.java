@@ -73,8 +73,8 @@ class CsvExportServiceTest {
         String[] lines = csv.split("\n");
 
         assertEquals(3, lines.length);
-        assertTrue(lines[1].contains("1,EXCHANGE_RATE_API"));
-        assertTrue(lines[2].contains("2,EXCHANGE_RATE_API"));
+        assertTrue(lines[1].contains(",USD,INR,"));
+        assertTrue(lines[2].contains(",EUR,USD,"));
     }
 
     @Test
@@ -87,7 +87,7 @@ class CsvExportServiceTest {
                 .build();
 
         String csv = csvExportService.exportToCsv(List.of(record));
-        assertTrue(csv.contains("0,,,,,,,FAILED_ALL_PROVIDERS_FAILED,"));
+        assertTrue(csv.contains("0,,USD,INR,,,,FAILED_ALL_PROVIDERS_FAILED,"));
     }
 
     @Test

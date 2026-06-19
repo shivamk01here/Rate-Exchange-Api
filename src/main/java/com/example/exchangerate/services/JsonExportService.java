@@ -50,12 +50,13 @@ public class JsonExportService {
                     : safeRecords.stream()
                         .map(r -> toFilteredMap(r, resolvedFields))
                         .collect(Collectors.toList());
-            ObjectMapper mapper = prettyPrint
-                    ? objectMapper.writerWithDefaultPrettyPrinter()
-                    : objectMapper;
             String json = filtered != null
-                    ? mapper.writeValueAsString(filtered)
-                    : mapper.writeValueAsString(safeRecords);
+                    ? (prettyPrint
+                        ? objectMapper.writerWithDefaultPrettyPrinter().writeValueAsString(filtered)
+                        : objectMapper.writeValueAsString(filtered))
+                    : (prettyPrint
+                        ? objectMapper.writerWithDefaultPrettyPrinter().writeValueAsString(safeRecords)
+                        : objectMapper.writeValueAsString(safeRecords));
             log.info("Exported {} conversion records to JSON", safeRecords.size());
             return json;
         } catch (JsonProcessingException e) {
