@@ -1,5 +1,6 @@
 package com.example.exchangerate.services;
 
+import com.example.exchangerate.config.ExportConfig;
 import com.example.exchangerate.models.ConversionRecord;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
@@ -16,11 +17,16 @@ import java.util.stream.Collectors;
 public class JsonExportService {
 
     private final ObjectMapper objectMapper;
+    private final ExportConfig exportConfig;
 
-    public JsonExportService() {
+    public JsonExportService(ExportConfig exportConfig) {
+        this.exportConfig = exportConfig;
         this.objectMapper = new ObjectMapper()
                 .registerModule(new JavaTimeModule())
                 .disable(SerializationFeature.WRITE_DATES_AS_TIMESTAMPS);
+        if (exportConfig.getJson().isIncludeNullFields()) {
+            objectMapper.setSerializationInclusion(com.fasterxml.jackson.annotation.JsonInclude.Include.ALWAYS);
+        }
     }
 
     private static final Set<String> ALL_FIELDS = Set.of(
