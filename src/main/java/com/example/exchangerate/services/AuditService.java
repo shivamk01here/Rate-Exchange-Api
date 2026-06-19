@@ -4,6 +4,8 @@ import com.example.exchangerate.audit.AuditRepository;
 import com.example.exchangerate.config.AuditConfig;
 import com.example.exchangerate.models.ConversionRecord;
 import com.example.exchangerate.models.ExchangeRateResponse;
+import com.example.exchangerate.models.HistoryPageRequest;
+import com.example.exchangerate.models.HistoryPageResponse;
 import com.example.exchangerate.models.ProviderCodes;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -66,6 +68,10 @@ public class AuditService {
 
     public Map<String, Long> getPopularPairs(int topN) {
         return auditRepository.getPopularPairs(topN);
+    }
+
+    public HistoryPageResponse getHistoryPage(HistoryPageRequest request) {
+        return auditRepository.findPage(request);
     }
 
     public int cleanupOldRecords(java.time.Duration maxAge) {
