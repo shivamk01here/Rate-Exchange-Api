@@ -9,6 +9,9 @@ import com.example.exchangerate.models.HistoryPageResponse;
 import com.example.exchangerate.models.ProviderCodes;
 import com.example.exchangerate.services.AuditService;
 import com.example.exchangerate.services.CsvExportService;
+import com.example.exchangerate.services.JsonExportService;
+import com.fasterxml.jackson.core.type.TypeReference;
+import com.fasterxml.jackson.databind.ObjectMapper;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 
@@ -23,13 +26,17 @@ class AuditControllerTest {
     private AuditRepository repository;
     private AuditService auditService;
     private CsvExportService csvExportService;
+    private JsonExportService jsonExportService;
+    private ObjectMapper objectMapper;
 
     @BeforeEach
     void setUp() {
         repository = new AuditRepository();
         auditService = new AuditService(repository, new AuditConfig());
         csvExportService = new CsvExportService();
-        controller = new AuditController(auditService, csvExportService);
+        jsonExportService = new JsonExportService(new ExportConfig());
+        controller = new AuditController(auditService, csvExportService, jsonExportService);
+        objectMapper = new ObjectMapper();
 
         for (int i = 0; i < 15; i++) {
             ConversionRecord record = ConversionRecord.builder()
@@ -127,7 +134,7 @@ class AuditControllerTest {
     void exportCsv_emptyHistoryReturnsOnlyHeader() {
         repository = new AuditRepository();
         auditService = new AuditService(repository, new AuditConfig());
-        controller = new AuditController(auditService, csvExportService);
+        controller = new AuditController(auditService, csvExportService, jsonExportService);
 
         var response = controller.exportCsv(null, null, null, null);
         String csv = response.getBody();
@@ -136,5 +143,52 @@ class AuditControllerTest {
         String[] lines = csv.split("\n");
         assertEquals(1, lines.length);
         assertEquals("ID,Provider,From,To,Amount,Rate,ConvertedAmount,Status,Timestamp", lines[0]);
+    }
+
+    @Test
+    void exportJson_returnsAllRecords() throws Exception {
+        var response = controller.exportJson(null, null, null, null, false, null);
+        String json = response.getBody();
+
+        assertNotNull(json);
+        List<Map<String, Object>> parsed = objectMapper.readValue(json, new TypeReference<>() {});
+        assertEquals(15, parsed.size());
+    }
+
+    @Test
+    void exportJson_filtersByCurrencyPair() throws Exception {
+        repository.save(ConversionRecord.builder()
+                .id("100").fromCurrency("EUR").toCurrency("USD")
+                .status("SUCCESS").timestamp(Instant.ofEpochMilli(9999))
+                .build());
+
+        var response = controller.exportJson("EUR", "USD", null, null, false, null);
+        String json = response.getBody();
+
+        assertNotNull(json);
+        List<Map<String, Object>> parsed = objectMapper.readValue(json, new TypeReference<>() {});
+        assertEquals(1, parsed.size());
+        assertEquals("EUR", parsed.get(0).get("fromCurrency"));
+    }
+
+    @Test
+    void exportJson_returnsAttachmentHeader() {
+        var response = controller.exportJson(null, null, null, null, false, null);
+
+        assertTrue(response.getHeaders().containsKey("Content-Disposition"));
+        assertEquals("attachment; filename=conversion-history.json",
+                response.getHeaders().get("Content-Disposition").get(0));
+    }
+
+    @Test
+    void exportJson_emptyHistoryReturnsEmptyArray() {
+        repository = new AuditRepository();
+        auditService = new AuditService(repository, new AuditConfig());
+        controller = new AuditController(auditService, csvExportService, jsonExportService);
+
+        var response = controller.exportJson(null, null, null, null, false, null);
+        String json = response.getBody();
+
+        assertEquals("[]", json);
     }
 }
