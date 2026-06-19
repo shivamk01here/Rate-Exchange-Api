@@ -1,6 +1,8 @@
 package com.example.exchangerate.audit;
 
 import com.example.exchangerate.models.ConversionRecord;
+import com.example.exchangerate.models.HistoryPageRequest;
+import com.example.exchangerate.models.HistoryPageResponse;
 import com.example.exchangerate.models.ProviderCodes;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Component;
@@ -95,6 +97,44 @@ public class AuditRepository {
                 .limit(topN)
                 .collect(Collectors.toMap(
                         Map.Entry::getKey, Map.Entry::getValue, (a, b) -> a, java.util.LinkedHashMap::new));
+    }
+
+    public HistoryPageResponse findPage(HistoryPageRequest pageRequest) {
+        int page = Math.max(0, pageRequest.getPage());
+        int size = Math.max(1, pageRequest.getSize());
+
+        List<ConversionRecord> filtered = records.stream()
+                .filter(r -> pageRequest.getFromCurrency() == null
+                        || pageRequest.getFromCurrency().equalsIgnoreCase(r.getFromCurrency()))
+                .filter(r -> pageRequest.getToCurrency() == null
+                        || pageRequest.getToCurrency().equalsIgnoreCase(r.getToCurrency()))
+                .filter(r -> pageRequest.getFromEpochMillis() == null
+                        || (r.getTimestamp() != null
+                                && !r.getTimestamp().isBefore(Instant.ofEpochMilli(pageRequest.getFromEpochMillis()))))
+                .filter(r -> pageRequest.getToEpochMillis() == null
+                        || (r.getTimestamp() != null
+                                && !r.getTimestamp().isAfter(Instant.ofEpochMilli(pageRequest.getToEpochMillis()))))
+                .sorted(Comparator.comparing(ConversionRecord::getTimestamp).reversed())
+                .collect(Collectors.toList());
+
+        long totalRecords = filtered.size();
+        int totalPages = (int) Math.ceil((double) totalRecords / size);
+        int fromIndex = page * size;
+        int toIndex = Math.min(fromIndex + size, filtered.size());
+
+        List<ConversionRecord> pageRecords = fromIndex < filtered.size()
+                ? filtered.subList(fromIndex, toIndex)
+                : List.of();
+
+        return HistoryPageResponse.builder()
+                .records(pageRecords)
+                .page(page)
+                .size(size)
+                .totalRecords(totalRecords)
+                .totalPages(totalPages)
+                .hasNext(page < totalPages - 1)
+                .hasPrevious(page > 0)
+                .build();
     }
 
     public int removeOlderThan(Instant cutoff) {
