@@ -4,8 +4,10 @@ import com.example.exchangerate.models.ConversionRecord;
 import com.example.exchangerate.models.HistoryPageRequest;
 import com.example.exchangerate.models.HistoryPageResponse;
 import com.example.exchangerate.models.ProviderCodes;
+import com.example.exchangerate.models.ExportFormat;
 import com.example.exchangerate.services.AuditService;
 import com.example.exchangerate.services.CsvExportService;
+import com.example.exchangerate.services.JsonExportService;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.HttpHeaders;
@@ -16,6 +18,7 @@ import org.springframework.web.bind.annotation.*;
 import java.time.Instant;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 
 @Slf4j
 @RestController
@@ -25,6 +28,7 @@ public class AuditController {
 
     private final AuditService auditService;
     private final CsvExportService csvExportService;
+    private final JsonExportService jsonExportService;
 
     @GetMapping("/history")
     public List<ConversionRecord> getHistory(
@@ -102,5 +106,29 @@ public class AuditController {
                 .header(HttpHeaders.CONTENT_DISPOSITION, "attachment; filename=conversion-history.csv")
                 .contentType(MediaType.parseMediaType("text/csv"))
                 .body(csv);
+    }
+
+    @GetMapping("/export/json")
+    public ResponseEntity<String> exportJson(
+            @RequestParam(required = false) String fromCurrency,
+            @RequestParam(required = false) String toCurrency,
+            @RequestParam(required = false) Long fromEpochMillis,
+            @RequestParam(required = false) Long toEpochMillis,
+            @RequestParam(defaultValue = "false") boolean pretty,
+            @RequestParam(required = false) Set<String> fields) {
+        HistoryPageRequest request = HistoryPageRequest.builder()
+                .page(0)
+                .size(Integer.MAX_VALUE)
+                .fromCurrency(fromCurrency)
+                .toCurrency(toCurrency)
+                .fromEpochMillis(fromEpochMillis)
+                .toEpochMillis(toEpochMillis)
+                .build();
+        HistoryPageResponse page = auditService.getHistoryPage(request);
+        String json = jsonExportService.exportToJson(page.getRecords(), pretty, fields);
+        return ResponseEntity.ok()
+                .header(HttpHeaders.CONTENT_DISPOSITION, "attachment; filename=conversion-history.json")
+                .contentType(MediaType.APPLICATION_JSON)
+                .body(json);
     }
 }
