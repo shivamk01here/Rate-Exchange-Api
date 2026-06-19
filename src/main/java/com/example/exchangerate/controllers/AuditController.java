@@ -1,6 +1,8 @@
 package com.example.exchangerate.controllers;
 
 import com.example.exchangerate.models.ConversionRecord;
+import com.example.exchangerate.models.HistoryPageRequest;
+import com.example.exchangerate.models.HistoryPageResponse;
 import com.example.exchangerate.models.ProviderCodes;
 import com.example.exchangerate.services.AuditService;
 import lombok.RequiredArgsConstructor;
@@ -23,6 +25,25 @@ public class AuditController {
     public List<ConversionRecord> getHistory(
             @RequestParam(defaultValue = "50") int limit) {
         return auditService.getHistory(limit);
+    }
+
+    @GetMapping("/history/page")
+    public HistoryPageResponse getHistoryPage(
+            @RequestParam(defaultValue = "0") int page,
+            @RequestParam(defaultValue = "20") int size,
+            @RequestParam(required = false) String fromCurrency,
+            @RequestParam(required = false) String toCurrency,
+            @RequestParam(required = false) Long fromEpochMillis,
+            @RequestParam(required = false) Long toEpochMillis) {
+        HistoryPageRequest request = HistoryPageRequest.builder()
+                .page(page)
+                .size(size)
+                .fromCurrency(fromCurrency)
+                .toCurrency(toCurrency)
+                .fromEpochMillis(fromEpochMillis)
+                .toEpochMillis(toEpochMillis)
+                .build();
+        return auditService.getHistoryPage(request);
     }
 
     @GetMapping("/history/pair")
