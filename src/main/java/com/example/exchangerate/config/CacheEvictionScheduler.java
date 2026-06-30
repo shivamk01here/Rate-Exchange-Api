@@ -12,12 +12,14 @@ import org.springframework.stereotype.Component;
 public class CacheEvictionScheduler {
 
     private final RateCacheService rateCacheService;
+    private final CacheConfig cacheConfig;
 
-    @Scheduled(fixedRateString = "${cache.eviction-interval-ms:60000}")
+    @Scheduled(fixedRateString = "${cache.eviction-interval-ms:30000}")
     public void evictExpiredEntries() {
         int evicted = rateCacheService.evictExpired();
         if (evicted > 0) {
-            log.info("Scheduled eviction removed {} expired cache entries", evicted);
+            log.info("Scheduled eviction removed {} expired cache entries (interval={}ms)",
+                    evicted, cacheConfig.getEvictionIntervalMs());
         }
     }
 }

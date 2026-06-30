@@ -13,4 +13,5 @@ public class CacheConfig {
 
     private Duration ttl = Duration.ofMinutes(5);
     private int maxSize = 1000;
+    private long evictionIntervalMs = 30000;
 }
