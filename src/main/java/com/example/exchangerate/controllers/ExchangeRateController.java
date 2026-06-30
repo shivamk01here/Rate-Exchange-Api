@@ -47,6 +47,10 @@ public class ExchangeRateController {
         if (!currencyCacheService.isSupported(to)) {
             throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Unsupported currency: " + to);
         }
+        if (request.getAmount().compareTo(batchConfig.getMaxAmount()) > 0) {
+            throw new ResponseStatusException(HttpStatus.BAD_REQUEST,
+                    "Amount exceeds maximum of " + batchConfig.getMaxAmount());
+        }
 
         String traceId = MDC.get("X-B3-TraceId");
         log.info("Received rate request: {}->{} amount={} | traceId={}",
@@ -76,6 +80,10 @@ public class ExchangeRateController {
         if (batchRequest.getToCurrencies().size() > batchConfig.getMaxSize()) {
             throw new ResponseStatusException(HttpStatus.BAD_REQUEST,
                     "Batch size exceeds maximum of " + batchConfig.getMaxSize());
+        }
+        if (batchRequest.getAmount().compareTo(batchConfig.getMaxAmount()) > 0) {
+            throw new ResponseStatusException(HttpStatus.BAD_REQUEST,
+                    "Amount exceeds maximum of " + batchConfig.getMaxAmount());
         }
 
         String unsupported = batchRequest.getToCurrencies().stream()

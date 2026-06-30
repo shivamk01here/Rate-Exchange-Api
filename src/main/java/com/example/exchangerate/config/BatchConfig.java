@@ -10,4 +10,5 @@ import org.springframework.stereotype.Component;
 public class BatchConfig {
 
     private int maxSize = 10;
+    private int maxAmount = 1000000;
 }
