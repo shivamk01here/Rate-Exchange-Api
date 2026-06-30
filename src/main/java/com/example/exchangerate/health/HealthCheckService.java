@@ -2,6 +2,7 @@ package com.example.exchangerate.health;
 
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 
 import java.time.Instant;
@@ -15,6 +16,9 @@ import java.util.Map;
 public class HealthCheckService {
 
     private final List<HealthIndicator> indicators;
+
+    @Value("${spring.application.name:exchange-rate-service}")
+    private String appName;
 
     public Map<String, Object> getHealth() {
         Map<String, Object> components = new HashMap<>();
@@ -42,6 +46,7 @@ public class HealthCheckService {
         }
 
         Map<String, Object> result = new HashMap<>();
+        result.put("service", appName);
         result.put("status", overall);
         result.put("timestamp", Instant.now().toString());
         result.put("components", components);
