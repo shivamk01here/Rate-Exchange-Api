@@ -92,4 +92,50 @@ class CurrencyServiceTest {
         assertEquals("\u20B9", inr.getSymbol());
         assertEquals(356, inr.getNumericCode());
     }
+
+    @Test
+    void searchCurrencies_returnsMatchesForCodeQuery() {
+        Collection<CurrencyInfo> results = currencyService.searchCurrencies("USD");
+        assertEquals(1, results.size());
+        assertEquals("USD", results.iterator().next().getCode());
+    }
+
+    @Test
+    void searchCurrencies_returnsMatchesForPartialCodeQuery() {
+        Collection<CurrencyInfo> results = currencyService.searchCurrencies("US");
+        assertTrue(results.stream().anyMatch(c -> "USD".equals(c.getCode())));
+    }
+
+    @Test
+    void searchCurrencies_returnsMatchesForNameQuery() {
+        Collection<CurrencyInfo> results = currencyService.searchCurrencies("Dollar");
+        assertTrue(results.stream().anyMatch(c -> "USD".equals(c.getCode())));
+        assertTrue(results.stream().anyMatch(c -> "AUD".equals(c.getCode())));
+        assertTrue(results.stream().anyMatch(c -> "CAD".equals(c.getCode())));
+    }
+
+    @Test
+    void searchCurrencies_returnsMatchesCaseInsensitive() {
+        Collection<CurrencyInfo> results = currencyService.searchCurrencies("usd");
+        assertEquals(1, results.size());
+        assertEquals("USD", results.iterator().next().getCode());
+    }
+
+    @Test
+    void searchCurrencies_returnsAllForBlankQuery() {
+        Collection<CurrencyInfo> results = currencyService.searchCurrencies("");
+        assertEquals(20, results.size());
+    }
+
+    @Test
+    void searchCurrencies_returnsAllForNullQuery() {
+        Collection<CurrencyInfo> results = currencyService.searchCurrencies(null);
+        assertEquals(20, results.size());
+    }
+
+    @Test
+    void searchCurrencies_returnsEmptyForNoMatch() {
+        Collection<CurrencyInfo> results = currencyService.searchCurrencies("XYZ");
+        assertTrue(results.isEmpty());
+    }
 }

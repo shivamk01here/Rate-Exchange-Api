@@ -8,6 +8,7 @@ import java.util.Collection;
 import java.util.Collections;
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
+import java.util.stream.Collectors;
 
 @Slf4j
 @Service
@@ -61,7 +62,7 @@ public class CurrencyService {
         return currencies.values().stream()
                 .filter(c -> c.getCode().toLowerCase().contains(lower)
                         || c.getName().toLowerCase().contains(lower))
-                .collect(java.util.stream.Collectors.toList());
+                .collect(Collectors.toList());
     }
 
     public CurrencyInfo getCurrency(String code) {
