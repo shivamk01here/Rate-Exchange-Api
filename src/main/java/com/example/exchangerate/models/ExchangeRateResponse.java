@@ -6,6 +6,7 @@ import lombok.Data;
 import lombok.NoArgsConstructor;
 
 import java.math.BigDecimal;
+import java.time.Instant;
 
 @Data
 @Builder
@@ -20,6 +21,7 @@ public class ExchangeRateResponse {
     private BigDecimal rate;
     private BigDecimal convertedAmount;
     private String status;
+    @Builder.Default private Instant timestamp = Instant.now();
 
     public static ExchangeRateResponse fromProviderResponse(ProviderCodes providerCode, ExchangeRateRequest request, ProviderRateResponse providerResponse) {
         return ExchangeRateResponse.builder()
@@ -30,6 +32,7 @@ public class ExchangeRateResponse {
                 .rate(providerResponse.getRate())
                 .convertedAmount(request.getAmount().multiply(providerResponse.getRate()))
                 .status("SUCCESS")
+                .timestamp(Instant.now())
                 .build();
     }
 
@@ -42,6 +45,7 @@ public class ExchangeRateResponse {
                 .rate(BigDecimal.ZERO)
                 .convertedAmount(BigDecimal.ZERO)
                 .status("FAILED_" + reason)
+                .timestamp(Instant.now())
                 .build();
     }
 
