@@ -5,6 +5,9 @@ spring:
   application:
     name: exchange-rate-service
 
+app:
+  version: @project.version@
+
 logging:
   level:
     com.example.exchangerate: DEBUG
