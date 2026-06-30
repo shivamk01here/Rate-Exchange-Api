@@ -50,6 +50,8 @@ public class HealthCheckService {
         result.put("status", overall);
         result.put("timestamp", Instant.now().toString());
         result.put("components", components);
+
+        log.info("Health check: overall={}, components={}", overall, components.size());
         return result;
     }
 }
