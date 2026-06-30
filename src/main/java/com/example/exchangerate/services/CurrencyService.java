@@ -53,6 +53,17 @@ public class CurrencyService {
         return Collections.unmodifiableCollection(currencies.values());
     }
 
+    public Collection<CurrencyInfo> searchCurrencies(String query) {
+        if (query == null || query.isBlank()) {
+            return getSupportedCurrencies();
+        }
+        String lower = query.toLowerCase();
+        return currencies.values().stream()
+                .filter(c -> c.getCode().toLowerCase().contains(lower)
+                        || c.getName().toLowerCase().contains(lower))
+                .collect(java.util.stream.Collectors.toList());
+    }
+
     public CurrencyInfo getCurrency(String code) {
         return code != null ? currencies.get(code.toUpperCase()) : null;
     }

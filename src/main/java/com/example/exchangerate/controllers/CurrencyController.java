@@ -23,6 +23,11 @@ public class CurrencyController {
         return currencyService.getSupportedCurrencies();
     }
 
+    @GetMapping("/search")
+    public Collection<CurrencyInfo> searchCurrencies(@RequestParam String q) {
+        return currencyService.searchCurrencies(q);
+    }
+
     @GetMapping("/{code}")
     public CurrencyInfo getCurrency(@PathVariable String code) {
         CurrencyInfo currency = currencyService.getCurrency(code);
