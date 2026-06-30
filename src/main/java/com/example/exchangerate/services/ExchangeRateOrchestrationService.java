@@ -25,6 +25,7 @@ public class ExchangeRateOrchestrationService {
     private final ProviderFactory providerFactory;
     private final AuditService auditService;
     private final RateCacheService rateCacheService;
+    private final ProviderMetricsCollector providerMetrics;
 
     private static final List<ProviderCodes> ROUTING_ORDER = List.of(
             ProviderCodes.EXCHANGE_RATE_API,
@@ -101,15 +102,18 @@ public class ExchangeRateOrchestrationService {
         ExchangeRateProvider provider = providerFactory.getProvider(code);
 
         log.info("Attempting provider {} (attempt {}/{})", code, index + 1, ROUTING_ORDER.size());
+        providerMetrics.recordCall(code);
 
         return provider.fetchRate(request)
                 .thenCompose(response -> {
                     auditService.recordConversion(response);
                     if ("SUCCESS".equals(response.getStatus())) {
+                        providerMetrics.recordSuccess(code);
                         log.info("Provider {} succeeded: rate={}", code, response.getRate());
                         rateCacheService.put(response.getFromCurrency(), response.getToCurrency(), response);
                         return CompletableFuture.completedFuture(response);
                     }
+                    providerMetrics.recordFailure(code);
                     log.warn("Provider {} failed, trying next", code);
                     return tryProviders(request, index + 1);
                 });
