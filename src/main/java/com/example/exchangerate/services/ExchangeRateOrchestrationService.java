@@ -105,6 +105,7 @@ public class ExchangeRateOrchestrationService {
 
     public CompletableFuture<RateCompareResponse> compareRates(RateCompareRequest request) {
         log.info("Comparing rates across all providers for {}->{}", request.getFromCurrency(), request.getToCurrency());
+        providerMetrics.recordCompare();
 
         String cacheKey = RateCacheService.cacheKey(request.getFromCurrency(), request.getToCurrency());
         CachedCompare cached = compareCache.get(cacheKey);

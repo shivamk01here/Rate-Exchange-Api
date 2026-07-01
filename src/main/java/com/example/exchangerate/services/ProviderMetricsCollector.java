@@ -15,6 +15,7 @@ public class ProviderMetricsCollector {
     private final ConcurrentHashMap<ProviderCodes, AtomicLong> callCounts = new ConcurrentHashMap<>();
     private final ConcurrentHashMap<ProviderCodes, AtomicLong> successCounts = new ConcurrentHashMap<>();
     private final ConcurrentHashMap<ProviderCodes, AtomicLong> failureCounts = new ConcurrentHashMap<>();
+    private final AtomicLong compareCount = new AtomicLong(0);
 
     public void recordCall(ProviderCodes code) {
         callCounts.computeIfAbsent(code, k -> new AtomicLong()).incrementAndGet();
@@ -26,6 +27,10 @@ public class ProviderMetricsCollector {
 
     public void recordFailure(ProviderCodes code) {
         failureCounts.computeIfAbsent(code, k -> new AtomicLong()).incrementAndGet();
+    }
+
+    public void recordCompare() {
+        compareCount.incrementAndGet();
     }
 
     public Map<String, Object> getProviderStats(ProviderCodes code) {
@@ -44,6 +49,7 @@ public class ProviderMetricsCollector {
         for (ProviderCodes code : ProviderCodes.values()) {
             stats.put(code.name(), getProviderStats(code));
         }
+        stats.put("totalCompares", compareCount.get());
         return stats;
     }
 
@@ -51,6 +57,7 @@ public class ProviderMetricsCollector {
         callCounts.clear();
         successCounts.clear();
         failureCounts.clear();
+        compareCount.set(0);
         log.info("Provider metrics reset");
     }
 }
