@@ -6,6 +6,9 @@ import com.example.exchangerate.models.BatchRateResult;
 import com.example.exchangerate.models.ExchangeRateRequest;
 import com.example.exchangerate.models.ExchangeRateResponse;
 import com.example.exchangerate.models.ProviderCodes;
+import com.example.exchangerate.models.ProviderRateDetail;
+import com.example.exchangerate.models.RateCompareRequest;
+import com.example.exchangerate.models.RateCompareResponse;
 import com.example.exchangerate.providers.ExchangeRateProvider;
 import com.example.exchangerate.providers.ProviderFactory;
 import lombok.RequiredArgsConstructor;
@@ -87,6 +90,58 @@ public class ExchangeRateOrchestrationService {
                             .amount(batchRequest.getAmount())
                             .results(results)
                             .build();
+                });
+    }
+
+    public CompletableFuture<RateCompareResponse> compareRates(RateCompareRequest request) {
+        log.info("Comparing rates across all providers for {}->{}", request.getFromCurrency(), request.getToCurrency());
+
+        List<CompletableFuture<ProviderRateDetail>> futures = ROUTING_ORDER.stream()
+                .map(code -> {
+                    ExchangeRateProvider provider = providerFactory.getProvider(code);
+                    ExchangeRateRequest rateRequest = ExchangeRateRequest.builder()
+                            .fromCurrency(request.getFromCurrency())
+                            .toCurrency(request.getToCurrency())
+                            .amount(new java.math.BigDecimal("1"))
+                            .build();
+                    providerMetrics.recordCall(code);
+                    return provider.fetchRate(rateRequest)
+                            .thenApply(response -> {
+                                if ("SUCCESS".equals(response.getStatus())) {
+                                    providerMetrics.recordSuccess(code);
+                                } else {
+                                    providerMetrics.recordFailure(code);
+                                }
+                                return ProviderRateDetail.builder()
+                                        .providerCode(code)
+                                        .rate(response.getRate())
+                                        .status(response.getStatus())
+                                        .build();
+                            })
+                            .exceptionally(e -> {
+                                providerMetrics.recordFailure(code);
+                                log.warn("Provider {} failed during comparison: {}", code, e.getMessage());
+                                return ProviderRateDetail.builder()
+                                        .providerCode(code)
+                                        .rate(java.math.BigDecimal.ZERO)
+                                        .status("FAILED_PROVIDER_ERROR")
+                                        .build();
+                            });
+                })
+                .collect(Collectors.toList());
+
+        return CompletableFuture.allOf(futures.toArray(new CompletableFuture[0]))
+                .thenApply(v -> {
+                    List<ProviderRateDetail> details = futures.stream()
+                            .map(CompletableFuture::join)
+                            .collect(Collectors.toList());
+                    RateCompareResponse response = RateCompareResponse.builder()
+                            .fromCurrency(request.getFromCurrency())
+                            .toCurrency(request.getToCurrency())
+                            .providerRates(details)
+                            .build();
+                    auditService.recordConversion(response);
+                    return response;
                 });
     }
 

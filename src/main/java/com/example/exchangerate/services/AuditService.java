@@ -7,6 +7,7 @@ import com.example.exchangerate.models.ExchangeRateResponse;
 import com.example.exchangerate.models.HistoryPageRequest;
 import com.example.exchangerate.models.HistoryPageResponse;
 import com.example.exchangerate.models.ProviderCodes;
+import com.example.exchangerate.models.RateCompareResponse;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
@@ -22,6 +23,11 @@ public class AuditService {
 
     private final AuditRepository auditRepository;
     private final AuditConfig auditConfig;
+
+    public void recordConversion(RateCompareResponse response) {
+        log.info("Auditing rate comparison: {}->{} with {} provider results",
+                response.getFromCurrency(), response.getToCurrency(), response.getProviderRates().size());
+    }
 
     public ConversionRecord recordConversion(ExchangeRateResponse response) {
         ConversionRecord record = ConversionRecord.builder()
