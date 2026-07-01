@@ -16,8 +16,11 @@ import lombok.extern.slf4j.Slf4j;
 import org.slf4j.MDC;
 import org.springframework.stereotype.Service;
 
+import java.time.Instant;
 import java.util.List;
+import java.util.Map;
 import java.util.concurrent.CompletableFuture;
+import java.util.concurrent.ConcurrentHashMap;
 import java.util.stream.Collectors;
 
 @Slf4j
@@ -29,6 +32,13 @@ public class ExchangeRateOrchestrationService {
     private final AuditService auditService;
     private final RateCacheService rateCacheService;
     private final ProviderMetricsCollector providerMetrics;
+
+    private final ConcurrentHashMap<String, CachedCompare> compareCache = new ConcurrentHashMap<>();
+    private static final long COMPARE_CACHE_TTL_SECONDS = 120;
+
+    private record CachedCompare(RateCompareResponse response, Instant expiresAt) {
+        boolean isValid() { return Instant.now().isBefore(expiresAt); }
+    }
 
     private static final List<ProviderCodes> ROUTING_ORDER = List.of(
             ProviderCodes.EXCHANGE_RATE_API,
@@ -96,6 +106,13 @@ public class ExchangeRateOrchestrationService {
     public CompletableFuture<RateCompareResponse> compareRates(RateCompareRequest request) {
         log.info("Comparing rates across all providers for {}->{}", request.getFromCurrency(), request.getToCurrency());
 
+        String cacheKey = RateCacheService.cacheKey(request.getFromCurrency(), request.getToCurrency());
+        CachedCompare cached = compareCache.get(cacheKey);
+        if (cached != null && cached.isValid()) {
+            log.info("Returning cached comparison for {}", cacheKey);
+            return CompletableFuture.completedFuture(cached.response());
+        }
+
         List<CompletableFuture<ProviderRateDetail>> futures = ROUTING_ORDER.stream()
                 .map(code -> {
                     ExchangeRateProvider provider = providerFactory.getProvider(code);
@@ -141,6 +158,7 @@ public class ExchangeRateOrchestrationService {
                             .providerRates(details)
                             .build();
                     response.computeBest();
+                    compareCache.put(cacheKey, new CachedCompare(response, Instant.now().plusSeconds(COMPARE_CACHE_TTL_SECONDS)));
                     auditService.recordConversion(response);
                     return response;
                 });
