@@ -102,7 +102,7 @@ public class ExchangeRateOrchestrationService {
                     ExchangeRateRequest rateRequest = ExchangeRateRequest.builder()
                             .fromCurrency(request.getFromCurrency())
                             .toCurrency(request.getToCurrency())
-                            .amount(new java.math.BigDecimal("1"))
+                            .amount(request.getAmount() != null ? request.getAmount() : java.math.BigDecimal.ONE)
                             .build();
                     providerMetrics.recordCall(code);
                     return provider.fetchRate(rateRequest)
