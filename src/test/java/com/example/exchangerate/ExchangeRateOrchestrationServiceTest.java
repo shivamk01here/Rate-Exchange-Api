@@ -12,6 +12,7 @@ import com.example.exchangerate.config.CacheConfig;
 import com.example.exchangerate.services.AuditService;
 import com.example.exchangerate.services.CacheMetricsCollector;
 import com.example.exchangerate.services.ExchangeRateOrchestrationService;
+import com.example.exchangerate.services.ProviderMetricsCollector;
 import com.example.exchangerate.services.RateCacheService;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -57,7 +58,7 @@ class ExchangeRateOrchestrationServiceTest {
         rateCacheService = new RateCacheService(new CacheConfig(), new CacheMetricsCollector());
         auditRepository = new AuditRepository();
         var auditService = new AuditService(auditRepository, null);
-        orchestrationService = new ExchangeRateOrchestrationService(providerFactory, auditService, rateCacheService);
+        orchestrationService = new ExchangeRateOrchestrationService(providerFactory, auditService, rateCacheService, new ProviderMetricsCollector());
     }
 
     @Test
