@@ -140,6 +140,7 @@ public class ExchangeRateOrchestrationService {
                             .toCurrency(request.getToCurrency())
                             .providerRates(details)
                             .build();
+                    response.computeBest();
                     auditService.recordConversion(response);
                     return response;
                 });
