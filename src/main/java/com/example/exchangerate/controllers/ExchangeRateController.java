@@ -5,6 +5,8 @@ import com.example.exchangerate.models.BatchConversionRequest;
 import com.example.exchangerate.models.BatchConversionResponse;
 import com.example.exchangerate.models.ExchangeRateRequest;
 import com.example.exchangerate.models.ExchangeRateResponse;
+import com.example.exchangerate.models.RateCompareRequest;
+import com.example.exchangerate.models.RateCompareResponse;
 import com.example.exchangerate.services.CurrencyCacheService;
 import com.example.exchangerate.services.ExchangeRateOrchestrationService;
 import lombok.RequiredArgsConstructor;
@@ -98,6 +100,24 @@ public class ExchangeRateController {
                 batchRequest.getAmount(), from, batchRequest.getToCurrencies());
 
         return orchestrationService.getBatchRates(batchRequest);
+    }
+
+    @PostMapping(value = "/rates/compare")
+    public CompletableFuture<RateCompareResponse> compareRates(
+            @Valid @RequestBody RateCompareRequest request) {
+
+        String from = request.getFromCurrency();
+        String to = request.getToCurrency();
+
+        if (!currencyCacheService.isSupported(from)) {
+            throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Unsupported currency: " + from);
+        }
+        if (!currencyCacheService.isSupported(to)) {
+            throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Unsupported currency: " + to);
+        }
+
+        log.info("Received rate comparison request: {}->{}", from, to);
+        return orchestrationService.compareRates(request);
     }
 
     @PostMapping(value = "/rates/pipe", consumes = MediaType.TEXT_PLAIN_VALUE)
