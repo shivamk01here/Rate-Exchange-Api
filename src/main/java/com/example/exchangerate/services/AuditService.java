@@ -15,6 +15,7 @@ import org.springframework.stereotype.Service;
 import java.time.Instant;
 import java.util.List;
 import java.util.Map;
+import java.util.stream.Collectors;
 
 @Slf4j
 @Service
@@ -24,9 +25,33 @@ public class AuditService {
     private final AuditRepository auditRepository;
     private final AuditConfig auditConfig;
 
-    public void recordConversion(RateCompareResponse response) {
+    public List<ConversionRecord> recordConversion(RateCompareResponse response) {
         log.info("Auditing rate comparison: {}->{} with {} provider results",
                 response.getFromCurrency(), response.getToCurrency(), response.getProviderRates().size());
+
+        List<ConversionRecord> records = response.getProviderRates().stream()
+                .map(detail -> {
+                    ConversionRecord record = ConversionRecord.builder()
+                            .providerCode(detail.getProviderCode())
+                            .fromCurrency(response.getFromCurrency())
+                            .toCurrency(response.getToCurrency())
+                            .amount(java.math.BigDecimal.ONE)
+                            .rate(detail.getRate())
+                            .convertedAmount(detail.getRate())
+                            .status(detail.getStatus())
+                            .timestamp(Instant.now())
+                            .build();
+                    return auditRepository.save(record);
+                })
+                .collect(Collectors.toList());
+
+        if (response.getBestProvider() != null) {
+            log.info("Best rate for {}->{}: {} from {}",
+                    response.getFromCurrency(), response.getToCurrency(),
+                    response.getBestRate(), response.getBestProvider());
+        }
+
+        return records;
     }
 
     public ConversionRecord recordConversion(ExchangeRateResponse response) {
