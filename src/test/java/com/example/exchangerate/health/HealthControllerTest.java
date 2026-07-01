@@ -2,6 +2,7 @@ package com.example.exchangerate.health;
 
 import com.example.exchangerate.controllers.HealthController;
 import com.example.exchangerate.health.HealthCheckService;
+import com.example.exchangerate.services.ProviderMetricsCollector;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 
@@ -33,7 +34,7 @@ class HealthControllerTest {
                     }
                 }
         ));
-        healthController = new HealthController(healthCheckService);
+        healthController = new HealthController(healthCheckService, new ProviderMetricsCollector());
     }
 
     @Test

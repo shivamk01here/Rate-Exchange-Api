@@ -21,6 +21,7 @@ import org.springframework.web.server.ServerWebExchange;
 import reactor.core.publisher.Mono;
 
 import javax.validation.Valid;
+import java.math.BigDecimal;
 import java.net.URI;
 import java.util.concurrent.CompletableFuture;
 import java.util.stream.Collectors;
@@ -49,7 +50,7 @@ public class ExchangeRateController {
         if (!currencyCacheService.isSupported(to)) {
             throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Unsupported currency: " + to);
         }
-        if (request.getAmount().compareTo(batchConfig.getMaxAmount()) > 0) {
+        if (request.getAmount().compareTo(BigDecimal.valueOf(batchConfig.getMaxAmount())) > 0) {
             throw new ResponseStatusException(HttpStatus.BAD_REQUEST,
                     "Amount exceeds maximum of " + batchConfig.getMaxAmount());
         }
@@ -83,7 +84,7 @@ public class ExchangeRateController {
             throw new ResponseStatusException(HttpStatus.BAD_REQUEST,
                     "Batch size exceeds maximum of " + batchConfig.getMaxSize());
         }
-        if (batchRequest.getAmount().compareTo(batchConfig.getMaxAmount()) > 0) {
+        if (batchRequest.getAmount().compareTo(BigDecimal.valueOf(batchConfig.getMaxAmount())) > 0) {
             throw new ResponseStatusException(HttpStatus.BAD_REQUEST,
                     "Amount exceeds maximum of " + batchConfig.getMaxAmount());
         }

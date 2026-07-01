@@ -67,7 +67,7 @@ class ExchangeRateControllerTest {
 
         when(orchestrationService.compareRates(any())).thenReturn(CompletableFuture.completedFuture(expected));
 
-        RateCompareResponse response = controller.compareRates(request);
+        RateCompareResponse response = controller.compareRates(request).join();
 
         assertEquals("USD", response.getFromCurrency());
         assertEquals("INR", response.getToCurrency());
@@ -82,7 +82,7 @@ class ExchangeRateControllerTest {
                 .toCurrency("USD")
                 .build();
 
-        assertThrows(ResponseStatusException.class, () -> controller.compareRates(request));
+        assertThrows(ResponseStatusException.class, () -> controller.compareRates(request).join());
     }
 
     @Test
@@ -92,6 +92,6 @@ class ExchangeRateControllerTest {
                 .toCurrency("XYZ")
                 .build();
 
-        assertThrows(ResponseStatusException.class, () -> controller.compareRates(request));
+        assertThrows(ResponseStatusException.class, () -> controller.compareRates(request).join());
     }
 }
