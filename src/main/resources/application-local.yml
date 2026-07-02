@@ -28,3 +28,17 @@ export:
     pretty-print: true
     date-format: iso
     include-null-fields: false
+
+alert:
+  evaluation:
+    interval-ms: 30000
+
+notification:
+  email:
+    enabled: true
+    from: noreply@exchangerate.local
+
+spring:
+  mail:
+    host: ${SPRING_MAIL_HOST:localhost}
+    port: ${SPRING_MAIL_PORT:1025}

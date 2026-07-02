@@ -29,3 +29,12 @@ export:
     pretty-print: true
     date-format: iso
     include-null-fields: false
+
+alert:
+  evaluation:
+    interval-ms: 120000
+
+notification:
+  email:
+    enabled: true
+    from: alerts@exchangerate.prod
