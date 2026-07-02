@@ -1,5 +1,6 @@
 package com.example.exchangerate.services;
 
+import com.example.exchangerate.alert.AlertEvaluationService;
 import com.example.exchangerate.models.BatchConversionRequest;
 import com.example.exchangerate.models.BatchConversionResponse;
 import com.example.exchangerate.models.BatchRateResult;
@@ -32,6 +33,7 @@ public class ExchangeRateOrchestrationService {
     private final AuditService auditService;
     private final RateCacheService rateCacheService;
     private final ProviderMetricsCollector providerMetrics;
+    private final AlertEvaluationService alertEvaluationService;
 
     private final ConcurrentHashMap<String, CachedCompare> compareCache = new ConcurrentHashMap<>();
     private static final long COMPARE_CACHE_TTL_SECONDS = 120;
@@ -186,6 +188,7 @@ public class ExchangeRateOrchestrationService {
                         providerMetrics.recordSuccess(code);
                         log.info("Provider {} succeeded: rate={}", code, response.getRate());
                         rateCacheService.put(response.getFromCurrency(), response.getToCurrency(), response);
+                        alertEvaluationService.evaluateAndNotify(response);
                         return CompletableFuture.completedFuture(response);
                     }
                     providerMetrics.recordFailure(code);

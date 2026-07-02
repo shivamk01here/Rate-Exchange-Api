@@ -9,6 +9,10 @@ import com.example.exchangerate.providers.ExchangeRateProvider;
 import com.example.exchangerate.providers.ProviderFactory;
 import com.example.exchangerate.audit.AuditRepository;
 import com.example.exchangerate.config.CacheConfig;
+import com.example.exchangerate.alert.AlertEvaluationService;
+import com.example.exchangerate.alert.AlertRepository;
+import com.example.exchangerate.notification.EmailConfig;
+import com.example.exchangerate.notification.EmailService;
 import com.example.exchangerate.services.AuditService;
 import com.example.exchangerate.services.CacheMetricsCollector;
 import com.example.exchangerate.services.ExchangeRateOrchestrationService;
@@ -58,7 +62,11 @@ class ExchangeRateOrchestrationServiceTest {
         rateCacheService = new RateCacheService(new CacheConfig(), new CacheMetricsCollector());
         auditRepository = new AuditRepository();
         var auditService = new AuditService(auditRepository, null);
-        orchestrationService = new ExchangeRateOrchestrationService(providerFactory, auditService, rateCacheService, new ProviderMetricsCollector());
+        var alertEvalService = new AlertEvaluationService(
+                new AlertRepository(), providerFactory,
+                new EmailService(null, new EmailConfig()));
+        orchestrationService = new ExchangeRateOrchestrationService(
+                providerFactory, auditService, rateCacheService, new ProviderMetricsCollector(), alertEvalService);
     }
 
     @Test

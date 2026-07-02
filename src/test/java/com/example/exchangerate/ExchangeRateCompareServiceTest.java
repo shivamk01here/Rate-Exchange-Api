@@ -12,6 +12,10 @@ import com.example.exchangerate.audit.AuditRepository;
 import com.example.exchangerate.config.CacheConfig;
 import com.example.exchangerate.services.AuditService;
 import com.example.exchangerate.services.CacheMetricsCollector;
+import com.example.exchangerate.alert.AlertEvaluationService;
+import com.example.exchangerate.alert.AlertRepository;
+import com.example.exchangerate.notification.EmailConfig;
+import com.example.exchangerate.notification.EmailService;
 import com.example.exchangerate.services.ExchangeRateOrchestrationService;
 import com.example.exchangerate.services.ProviderMetricsCollector;
 import com.example.exchangerate.services.RateCacheService;
@@ -58,8 +62,11 @@ class ExchangeRateCompareServiceTest {
         var rateCacheService = new RateCacheService(new CacheConfig(), new CacheMetricsCollector());
         var auditRepository = new AuditRepository();
         var auditService = new AuditService(auditRepository, null);
+        var alertEvalService = new AlertEvaluationService(
+                new AlertRepository(), providerFactory,
+                new EmailService(null, new EmailConfig()));
         orchestrationService = new ExchangeRateOrchestrationService(
-                providerFactory, auditService, rateCacheService, providerMetrics);
+                providerFactory, auditService, rateCacheService, providerMetrics, alertEvalService);
     }
 
     @Test
