@@ -56,3 +56,7 @@ notification:
     enabled: true
     from: noreply@exchangerate.local
     subject-template: "Rate Alert: {from}->{to}"
+  sms:
+    enabled: true
+    default-provider: CONSOLE
+    from: ExchangeRate

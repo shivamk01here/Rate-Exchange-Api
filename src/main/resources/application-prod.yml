@@ -38,3 +38,7 @@ notification:
   email:
     enabled: true
     from: alerts@exchangerate.prod
+  sms:
+    enabled: true
+    default-provider: TWILIO
+    from: ExchangeRate

@@ -37,6 +37,10 @@ notification:
   email:
     enabled: true
     from: noreply@exchangerate.local
+  sms:
+    enabled: true
+    default-provider: CONSOLE
+    from: ExchangeRate
 
 spring:
   mail:
