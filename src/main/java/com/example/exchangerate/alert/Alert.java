@@ -20,6 +20,7 @@ public class Alert {
     private AlertCondition condition;
     private BigDecimal threshold;
     private String email;
+    private String phone;
     private boolean enabled;
     @Builder.Default private Instant createdAt = Instant.now();
     private Instant lastTriggeredAt;
