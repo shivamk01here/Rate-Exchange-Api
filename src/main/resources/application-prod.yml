@@ -42,3 +42,7 @@ notification:
     enabled: true
     default-provider: TWILIO
     from: ExchangeRate
+  whatsapp:
+    enabled: true
+    default-provider: TWILIO
+    from: ExchangeRate

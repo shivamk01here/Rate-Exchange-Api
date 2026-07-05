@@ -60,3 +60,7 @@ notification:
     enabled: true
     default-provider: CONSOLE
     from: ExchangeRate
+  whatsapp:
+    enabled: true
+    default-provider: CONSOLE
+    from: ExchangeRate
