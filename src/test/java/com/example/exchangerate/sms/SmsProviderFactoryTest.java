@@ -17,7 +17,7 @@ class SmsProviderFactoryTest {
 
     @Test
     void shouldRegisterAndRetrieveProvider() {
-        SmsProvider provider = new ConsoleSmsProvider(factory);
+        ConsoleSmsProvider provider = new ConsoleSmsProvider(factory);
         provider.register();
 
         SmsProvider retrieved = factory.getProvider(SmsProviderType.CONSOLE);
@@ -26,10 +26,10 @@ class SmsProviderFactoryTest {
 
     @Test
     void shouldThrowWhenRegisteringDuplicateType() {
-        SmsProvider first = new ConsoleSmsProvider(factory);
+        ConsoleSmsProvider first = new ConsoleSmsProvider(factory);
         first.register();
 
-        SmsProvider second = new ConsoleSmsProvider(factory);
+        ConsoleSmsProvider second = new ConsoleSmsProvider(factory);
         assertThatThrownBy(second::register)
                 .isInstanceOf(IllegalStateException.class)
                 .hasMessageContaining("already registered");

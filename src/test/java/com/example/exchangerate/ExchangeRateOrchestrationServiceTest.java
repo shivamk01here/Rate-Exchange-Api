@@ -13,6 +13,10 @@ import com.example.exchangerate.alert.AlertEvaluationService;
 import com.example.exchangerate.alert.AlertRepository;
 import com.example.exchangerate.notification.EmailConfig;
 import com.example.exchangerate.notification.EmailService;
+import com.example.exchangerate.whatsapp.WhatsAppAlertService;
+import com.example.exchangerate.whatsapp.WhatsAppConfig;
+import com.example.exchangerate.whatsapp.WhatsAppService;
+import com.example.exchangerate.whatsapp.WhatsAppProviderFactory;
 import com.example.exchangerate.services.AuditService;
 import com.example.exchangerate.services.CacheMetricsCollector;
 import com.example.exchangerate.services.ExchangeRateOrchestrationService;
@@ -62,9 +66,13 @@ class ExchangeRateOrchestrationServiceTest {
         rateCacheService = new RateCacheService(new CacheConfig(), new CacheMetricsCollector());
         auditRepository = new AuditRepository();
         var auditService = new AuditService(auditRepository, null);
+        var waFactory = new WhatsAppProviderFactory();
+        var waConfig = new WhatsAppConfig();
+        var waService = new WhatsAppService(waFactory, waConfig);
+        var waAlertService = new WhatsAppAlertService(waService, waConfig);
         var alertEvalService = new AlertEvaluationService(
                 new AlertRepository(), providerFactory,
-                new EmailService(null, new EmailConfig()));
+                new EmailService(null, new EmailConfig()), waAlertService);
         orchestrationService = new ExchangeRateOrchestrationService(
                 providerFactory, auditService, rateCacheService, new ProviderMetricsCollector(), alertEvalService);
     }

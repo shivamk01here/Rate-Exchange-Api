@@ -17,7 +17,7 @@ class WhatsAppProviderFactoryTest {
 
     @Test
     void shouldRegisterAndRetrieveProvider() {
-        WhatsAppProvider provider = new ConsoleWhatsAppProvider(factory);
+        ConsoleWhatsAppProvider provider = new ConsoleWhatsAppProvider(factory);
         provider.register();
 
         WhatsAppProvider retrieved = factory.getProvider(WhatsAppProviderType.CONSOLE);
@@ -26,10 +26,10 @@ class WhatsAppProviderFactoryTest {
 
     @Test
     void shouldThrowWhenRegisteringDuplicateType() {
-        WhatsAppProvider first = new ConsoleWhatsAppProvider(factory);
+        ConsoleWhatsAppProvider first = new ConsoleWhatsAppProvider(factory);
         first.register();
 
-        WhatsAppProvider second = new ConsoleWhatsAppProvider(factory);
+        ConsoleWhatsAppProvider second = new ConsoleWhatsAppProvider(factory);
         assertThatThrownBy(second::register)
                 .isInstanceOf(IllegalStateException.class)
                 .hasMessageContaining("already registered");

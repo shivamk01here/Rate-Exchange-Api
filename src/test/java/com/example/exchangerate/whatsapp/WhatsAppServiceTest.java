@@ -19,9 +19,6 @@ class WhatsAppServiceTest {
     @Mock
     private WhatsAppProviderFactory factory;
 
-    @Mock
-    private WhatsAppProvider mockProvider;
-
     private WhatsAppConfig whatsAppConfig;
     private WhatsAppService whatsAppService;
 
@@ -36,14 +33,13 @@ class WhatsAppServiceTest {
 
     @Test
     void shouldSendViaDefaultProvider() {
+        ConsoleWhatsAppProvider realProvider = new ConsoleWhatsAppProvider(new WhatsAppProviderFactory());
         WhatsAppRequest request = WhatsAppRequest.builder()
                 .to("+1234567890")
                 .message("Test")
                 .build();
 
-        when(factory.getProvider(WhatsAppProviderType.CONSOLE)).thenReturn(mockProvider);
-        when(mockProvider.send(any())).thenReturn(CompletableFuture.completedFuture(
-                WhatsAppResponse.success(request, WhatsAppProviderType.CONSOLE, "MSG1")));
+        when(factory.getProvider(WhatsAppProviderType.CONSOLE)).thenReturn(realProvider);
 
         WhatsAppResponse response = whatsAppService.send(request).join();
 
@@ -68,14 +64,13 @@ class WhatsAppServiceTest {
 
     @Test
     void shouldSendWithSpecifiedProvider() {
+        ConsoleWhatsAppProvider realProvider = new ConsoleWhatsAppProvider(new WhatsAppProviderFactory());
         WhatsAppRequest request = WhatsAppRequest.builder()
                 .to("+1234567890")
                 .message("Test")
                 .build();
 
-        when(factory.getProvider(WhatsAppProviderType.TWILIO)).thenReturn(mockProvider);
-        when(mockProvider.send(any())).thenReturn(CompletableFuture.completedFuture(
-                WhatsAppResponse.success(request, WhatsAppProviderType.TWILIO, "MSG2")));
+        when(factory.getProvider(WhatsAppProviderType.TWILIO)).thenReturn(realProvider);
 
         WhatsAppResponse response = whatsAppService.sendWithProvider(request, WhatsAppProviderType.TWILIO).join();
 

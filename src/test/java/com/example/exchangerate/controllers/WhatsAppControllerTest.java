@@ -4,36 +4,28 @@ import com.example.exchangerate.whatsapp.WhatsAppProviderType;
 import com.example.exchangerate.whatsapp.WhatsAppRequest;
 import com.example.exchangerate.whatsapp.WhatsAppResponse;
 import com.example.exchangerate.whatsapp.WhatsAppService;
-import com.fasterxml.jackson.databind.ObjectMapper;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.boot.test.autoconfigure.web.servlet.WebMvcTest;
-import org.springframework.boot.test.mock.bean.MockBean;
+import org.springframework.boot.test.autoconfigure.web.reactive.WebFluxTest;
+import org.springframework.boot.test.mock.mockito.MockBean;
 import org.springframework.http.MediaType;
-import org.springframework.test.web.servlet.MockMvc;
-
-import java.util.concurrent.CompletableFuture;
+import org.springframework.test.web.reactive.server.WebTestClient;
+import reactor.core.publisher.Mono;
 
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.when;
-import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
-import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
-import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
-@WebMvcTest(WhatsAppController.class)
+@WebFluxTest(WhatsAppController.class)
 class WhatsAppControllerTest {
 
     @Autowired
-    private MockMvc mockMvc;
-
-    @Autowired
-    private ObjectMapper objectMapper;
+    private WebTestClient webTestClient;
 
     @MockBean
     private WhatsAppService whatsAppService;
 
     @Test
-    void shouldSendWhatsApp() throws Exception {
+    void shouldSendWhatsApp() {
         WhatsAppRequest request = WhatsAppRequest.builder()
                 .to("+1234567890")
                 .message("Test WhatsApp")
@@ -45,18 +37,20 @@ class WhatsAppControllerTest {
                 .provider(WhatsAppProviderType.CONSOLE)
                 .build();
 
-        when(whatsAppService.send(any())).thenReturn(CompletableFuture.completedFuture(response));
+        when(whatsAppService.send(any())).thenReturn(java.util.concurrent.CompletableFuture.completedFuture(response));
 
-        mockMvc.perform(post("/api/whatsapp/send")
-                        .contentType(MediaType.APPLICATION_JSON)
-                        .content(objectMapper.writeValueAsString(request)))
-                .andExpect(status().isOk())
-                .andExpect(jsonPath("$.success").value(true))
-                .andExpect(jsonPath("$.messageId").value("MSG123"));
+        webTestClient.post().uri("/api/whatsapp/send")
+                .contentType(MediaType.APPLICATION_JSON)
+                .bodyValue(request)
+                .exchange()
+                .expectStatus().isOk()
+                .expectBody()
+                .jsonPath("$.success").isEqualTo(true)
+                .jsonPath("$.messageId").isEqualTo("MSG123");
     }
 
     @Test
-    void shouldReturn503OnFailure() throws Exception {
+    void shouldReturn503OnFailure() {
         WhatsAppRequest request = WhatsAppRequest.builder()
                 .to("+1234567890")
                 .message("Test WhatsApp")
@@ -67,16 +61,17 @@ class WhatsAppControllerTest {
                 .errorMessage("Provider unavailable")
                 .build();
 
-        when(whatsAppService.send(any())).thenReturn(CompletableFuture.completedFuture(response));
+        when(whatsAppService.send(any())).thenReturn(java.util.concurrent.CompletableFuture.completedFuture(response));
 
-        mockMvc.perform(post("/api/whatsapp/send")
-                        .contentType(MediaType.APPLICATION_JSON)
-                        .content(objectMapper.writeValueAsString(request)))
-                .andExpect(status().isServiceUnavailable());
+        webTestClient.post().uri("/api/whatsapp/send")
+                .contentType(MediaType.APPLICATION_JSON)
+                .bodyValue(request)
+                .exchange()
+                .expectStatus().isEqualTo(503);
     }
 
     @Test
-    void shouldSendWhatsAppWithProvider() throws Exception {
+    void shouldSendWhatsAppWithProvider() {
         WhatsAppRequest request = WhatsAppRequest.builder()
                 .to("+1234567890")
                 .message("Test WhatsApp via Twilio")
@@ -88,25 +83,28 @@ class WhatsAppControllerTest {
                 .provider(WhatsAppProviderType.TWILIO)
                 .build();
 
-        when(whatsAppService.sendWithProvider(any(), any())).thenReturn(CompletableFuture.completedFuture(response));
+        when(whatsAppService.sendWithProvider(any(), any())).thenReturn(java.util.concurrent.CompletableFuture.completedFuture(response));
 
-        mockMvc.perform(post("/api/whatsapp/send/TWILIO")
-                        .contentType(MediaType.APPLICATION_JSON)
-                        .content(objectMapper.writeValueAsString(request)))
-                .andExpect(status().isOk())
-                .andExpect(jsonPath("$.provider").value("TWILIO"));
+        webTestClient.post().uri("/api/whatsapp/send/TWILIO")
+                .contentType(MediaType.APPLICATION_JSON)
+                .bodyValue(request)
+                .exchange()
+                .expectStatus().isOk()
+                .expectBody()
+                .jsonPath("$.provider").isEqualTo("TWILIO");
     }
 
     @Test
-    void shouldReturnBadRequestForInvalidProvider() throws Exception {
+    void shouldReturnBadRequestForInvalidProvider() {
         WhatsAppRequest request = WhatsAppRequest.builder()
                 .to("+1234567890")
                 .message("Test")
                 .build();
 
-        mockMvc.perform(post("/api/whatsapp/send/INVALID")
-                        .contentType(MediaType.APPLICATION_JSON)
-                        .content(objectMapper.writeValueAsString(request)))
-                .andExpect(status().isBadRequest());
+        webTestClient.post().uri("/api/whatsapp/send/INVALID")
+                .contentType(MediaType.APPLICATION_JSON)
+                .bodyValue(request)
+                .exchange()
+                .expectStatus().isBadRequest();
     }
 }
