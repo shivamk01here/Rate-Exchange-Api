@@ -6,6 +6,7 @@ import com.example.exchangerate.models.ProviderCodes;
 import com.example.exchangerate.providers.ExchangeRateProvider;
 import com.example.exchangerate.providers.ProviderFactory;
 import com.example.exchangerate.notification.EmailService;
+import com.example.exchangerate.whatsapp.WhatsAppAlertService;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
@@ -23,6 +24,7 @@ public class AlertEvaluationService {
     private final AlertRepository alertRepository;
     private final ProviderFactory providerFactory;
     private final EmailService emailService;
+    private final WhatsAppAlertService whatsAppAlertService;
 
     public void evaluateAllAlerts() {
         List<Alert> enabledAlerts = alertRepository.findEnabledAlerts();
@@ -65,6 +67,7 @@ public class AlertEvaluationService {
                     alert.getCondition(), currentRate, alert.getThreshold());
 
             emailService.sendRateAlert(alert, currentRate);
+            whatsAppAlertService.sendRateAlert(alert, currentRate);
             alertRepository.updateLastTriggered(alert.getId(), Instant.now());
         }
     }
@@ -81,6 +84,7 @@ public class AlertEvaluationService {
             if (alert.isEnabled() && alert.shouldTrigger(response.getRate())) {
                 log.info("Alert {} triggered inline: rate={}", alert.getId(), response.getRate());
                 emailService.sendRateAlert(alert, response.getRate());
+                whatsAppAlertService.sendRateAlert(alert, response.getRate());
                 alertRepository.updateLastTriggered(alert.getId(), Instant.now());
             }
         }
