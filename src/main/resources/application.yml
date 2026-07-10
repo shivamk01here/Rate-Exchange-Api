@@ -51,6 +51,24 @@ alert:
   evaluation:
     interval-ms: 60000
 
+rate-limit:
+  enabled: true
+  default-requests-per-window: 100
+  window-size: 1m
+  bypass-paths:
+    - /api/health
+    - /api/version
+  endpoints:
+    /api/rates:
+      max-requests: 30
+      window: 1m
+    /api/rates/batch:
+      max-requests: 10
+      window: 1m
+    /api/rates/compare:
+      max-requests: 20
+      window: 1m
+
 notification:
   email:
     enabled: true
