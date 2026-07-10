@@ -58,6 +58,7 @@ rate-limit:
   bypass-paths:
     - /api/health
     - /api/version
+    - /api/rate-limit
   endpoints:
     /api/rates:
       max-requests: 30
