@@ -25,11 +25,25 @@ public class RateLimitWebFilter implements WebFilter {
         String path = exchange.getRequest().getURI().getPath();
 
         if (!rateLimitService.isAllowed(clientIp, path)) {
+            RateLimitEntry entry = rateLimitService.getEntry(clientIp, path);
             exchange.getResponse().setStatusCode(HttpStatus.TOO_MANY_REQUESTS);
+            addRateLimitHeaders(exchange, entry);
             return exchange.getResponse().setComplete();
         }
 
+        RateLimitEntry entry = rateLimitService.getEntry(clientIp, path);
+        if (entry != null) {
+            addRateLimitHeaders(exchange, entry);
+        }
+
         return chain.filter(exchange);
+    }
+
+    private void addRateLimitHeaders(ServerWebExchange exchange, RateLimitEntry entry) {
+        if (entry == null) return;
+        exchange.getResponse().getHeaders().add("X-RateLimit-Limit", String.valueOf(entry.getMaxRequests()));
+        exchange.getResponse().getHeaders().add("X-RateLimit-Remaining", String.valueOf(entry.getRemainingRequests()));
+        exchange.getResponse().getHeaders().add("X-RateLimit-Reset", String.valueOf(entry.getWindowEnd().getEpochSecond()));
     }
 
     private String getClientKey(ServerWebExchange exchange) {
