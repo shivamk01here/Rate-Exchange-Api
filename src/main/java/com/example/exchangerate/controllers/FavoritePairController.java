@@ -2,6 +2,7 @@ package com.example.exchangerate.controllers;
 
 import com.example.exchangerate.favorites.FavoritePair;
 import com.example.exchangerate.favorites.FavoritePairService;
+import com.example.exchangerate.favorites.FavoriteRateResult;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.HttpStatus;
@@ -12,6 +13,7 @@ import org.springframework.web.server.ResponseStatusException;
 import javax.validation.Valid;
 import java.util.List;
 import java.util.Map;
+import java.util.concurrent.CompletableFuture;
 
 @Slf4j
 @RestController
@@ -71,5 +73,11 @@ public class FavoritePairController {
             throw new ResponseStatusException(HttpStatus.NOT_FOUND, "Favorite not found: " + id);
         }
         return Map.of("status", "deleted", "id", id);
+    }
+
+    @GetMapping("/rates")
+    public CompletableFuture<List<FavoriteRateResult>> getRatesForFavorites() {
+        log.info("Fetching rates for all favorite pairs");
+        return favoritePairService.fetchRatesForFavorites();
     }
 }
