@@ -12,6 +12,8 @@ import com.example.exchangerate.models.RateCompareRequest;
 import com.example.exchangerate.models.RateCompareResponse;
 import com.example.exchangerate.providers.ExchangeRateProvider;
 import com.example.exchangerate.providers.ProviderFactory;
+import com.example.exchangerate.trend.RateTrendConfig;
+import com.example.exchangerate.trend.RateTrendService;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.slf4j.MDC;
@@ -34,6 +36,8 @@ public class ExchangeRateOrchestrationService {
     private final RateCacheService rateCacheService;
     private final ProviderMetricsCollector providerMetrics;
     private final AlertEvaluationService alertEvaluationService;
+    private final RateTrendService rateTrendService;
+    private final RateTrendConfig rateTrendConfig;
 
     private final ConcurrentHashMap<String, CachedCompare> compareCache = new ConcurrentHashMap<>();
     private static final long COMPARE_CACHE_TTL_SECONDS = 120;
@@ -189,6 +193,9 @@ public class ExchangeRateOrchestrationService {
                         log.info("Provider {} succeeded: rate={}", code, response.getRate());
                         rateCacheService.put(response.getFromCurrency(), response.getToCurrency(), response);
                         alertEvaluationService.evaluateAndNotify(response);
+                        if (rateTrendConfig.isEnabled()) {
+                            rateTrendService.recordRate(response);
+                        }
                         return CompletableFuture.completedFuture(response);
                     }
                     providerMetrics.recordFailure(code);
