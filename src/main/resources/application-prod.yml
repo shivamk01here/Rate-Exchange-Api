@@ -34,6 +34,13 @@ alert:
   evaluation:
     interval-ms: 120000
 
+rate-trend:
+  enabled: true
+  max-snapshots-per-pair: 1000
+  display-limit: 20
+  stability-threshold-percent: 0.3
+  cleanup-interval-minutes: 120
+
 notification:
   email:
     enabled: true

@@ -75,6 +75,13 @@ favorites:
   enabled: true
   max-label-length: 100
 
+rate-trend:
+  enabled: true
+  max-snapshots-per-pair: 500
+  display-limit: 10
+  stability-threshold-percent: 0.5
+  cleanup-interval-minutes: 60
+
 notification:
   email:
     enabled: true
