@@ -61,7 +61,14 @@ public class ExchangeRateResponse {
     }
 
     public static ExchangeRateResponse fromPipeFormat(String pipe) {
+        if (pipe == null || pipe.isBlank()) {
+            throw new IllegalArgumentException("Pipe string must not be blank");
+        }
         String[] parts = pipe.split("\\|", -1);
+        if (parts.length < 6) {
+            throw new IllegalArgumentException(
+                    "Invalid pipe format: expected 6 fields (providerCode|fromCurrency|toCurrency|amount|rate|convertedAmount), got " + parts.length);
+        }
         return ExchangeRateResponse.builder()
                 .providerCode(parts[0].isEmpty() ? null : ProviderCodes.valueOf(parts[0]))
                 .fromCurrency(parts[1])

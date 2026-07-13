@@ -34,7 +34,14 @@ public class ExchangeRateRequest {
     }
 
     public static ExchangeRateRequest fromPipeFormat(String pipeString) {
+        if (pipeString == null || pipeString.isBlank()) {
+            throw new IllegalArgumentException("Pipe string must not be blank");
+        }
         String[] parts = pipeString.split("\\|");
+        if (parts.length < 3) {
+            throw new IllegalArgumentException(
+                    "Invalid pipe format: expected 3 fields (fromCurrency|toCurrency|amount), got " + parts.length);
+        }
         return ExchangeRateRequest.builder()
                 .fromCurrency(parts[0])
                 .toCurrency(parts[1])
