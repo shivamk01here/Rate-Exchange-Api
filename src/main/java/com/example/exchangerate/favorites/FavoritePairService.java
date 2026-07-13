@@ -90,7 +90,7 @@ public class FavoritePairService {
                                     .label(fav.getLabel())
                                     .rate(response.getRate())
                                     .status(response.getStatus())
-                                    .provider(response.getProvider())
+                                    .provider(response.getProviderCode() != null ? response.getProviderCode().name() : null)
                                     .build())
                             .exceptionally(e -> {
                                 log.warn("Failed to fetch rate for favorite {}: {}", fav.getId(), e.getMessage());
