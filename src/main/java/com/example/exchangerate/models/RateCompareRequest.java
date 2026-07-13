@@ -6,6 +6,7 @@ import lombok.Data;
 import lombok.NoArgsConstructor;
 
 import javax.validation.constraints.NotBlank;
+import javax.validation.constraints.NotNull;
 import javax.validation.constraints.Positive;
 import java.math.BigDecimal;
 
@@ -21,6 +22,7 @@ public class RateCompareRequest {
     @NotBlank
     private String toCurrency;
 
+    @NotNull
     @Positive
     private BigDecimal amount;
 }
