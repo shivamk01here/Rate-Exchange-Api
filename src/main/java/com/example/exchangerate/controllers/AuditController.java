@@ -5,6 +5,7 @@ import com.example.exchangerate.models.HistoryPageRequest;
 import com.example.exchangerate.models.HistoryPageResponse;
 import com.example.exchangerate.models.ProviderCodes;
 import com.example.exchangerate.models.ExportFormat;
+import com.example.exchangerate.config.ExportConfig;
 import com.example.exchangerate.services.AuditService;
 import com.example.exchangerate.services.CsvExportService;
 import com.example.exchangerate.services.JsonExportService;
@@ -29,6 +30,7 @@ public class AuditController {
     private final AuditService auditService;
     private final CsvExportService csvExportService;
     private final JsonExportService jsonExportService;
+    private final ExportConfig exportConfig;
 
     @GetMapping("/history")
     public List<ConversionRecord> getHistory(
@@ -97,7 +99,7 @@ public class AuditController {
             @RequestParam(required = false) Set<String> fields) {
         HistoryPageRequest request = HistoryPageRequest.builder()
                 .page(0)
-                .size(Integer.MAX_VALUE)
+                .size(exportConfig.getMaxExportSize())
                 .fromCurrency(fromCurrency)
                 .toCurrency(toCurrency)
                 .fromEpochMillis(fromEpochMillis)
@@ -138,7 +140,7 @@ public class AuditController {
             @RequestParam(required = false) Set<String> fields) {
         HistoryPageRequest request = HistoryPageRequest.builder()
                 .page(0)
-                .size(Integer.MAX_VALUE)
+                .size(exportConfig.getMaxExportSize())
                 .fromCurrency(fromCurrency)
                 .toCurrency(toCurrency)
                 .fromEpochMillis(fromEpochMillis)
