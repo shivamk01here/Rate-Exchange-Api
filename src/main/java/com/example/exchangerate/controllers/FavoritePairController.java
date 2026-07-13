@@ -58,7 +58,7 @@ public class FavoritePairController {
     }
 
     @PutMapping("/{id}")
-    public FavoritePair updateFavorite(@PathVariable String id, @RequestBody FavoritePair favorite) {
+    public FavoritePair updateFavorite(@PathVariable String id, @Valid @RequestBody FavoritePair favorite) {
         try {
             return favoritePairService.updateFavorite(id, favorite);
         } catch (IllegalArgumentException e) {
