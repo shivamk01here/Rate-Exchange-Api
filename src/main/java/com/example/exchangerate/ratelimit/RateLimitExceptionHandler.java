@@ -19,6 +19,7 @@ import java.util.Map;
 public class RateLimitExceptionHandler implements WebFilter {
 
     private final ObjectMapper objectMapper;
+    private final RateLimitService rateLimitService;
 
     @Override
     public Mono<Void> filter(ServerWebExchange exchange, WebFilterChain chain) {
@@ -30,6 +31,7 @@ public class RateLimitExceptionHandler implements WebFilter {
                 RateLimitEntry entry = null;
                 String clientIp = resolveClientIp(exchange);
                 String path = exchange.getRequest().getURI().getPath();
+                entry = rateLimitService.getEntry(clientIp, path);
 
                 Map<String, Object> body = new LinkedHashMap<>();
                 body.put("error", "Too Many Requests");
