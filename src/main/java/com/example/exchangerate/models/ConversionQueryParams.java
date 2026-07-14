@@ -16,4 +16,12 @@ public class ConversionQueryParams {
     private String from;
     private String to;
     private BigDecimal amount;
+
+    public ExchangeRateRequest toExchangeRateRequest() {
+        return ExchangeRateRequest.builder()
+                .fromCurrency(from != null ? from.toUpperCase() : null)
+                .toCurrency(to != null ? to.toUpperCase() : null)
+                .amount(amount)
+                .build();
+    }
 }
