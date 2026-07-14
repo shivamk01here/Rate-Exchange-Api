@@ -3,6 +3,7 @@ package com.example.exchangerate.controllers;
 import com.example.exchangerate.config.BatchConfig;
 import com.example.exchangerate.models.BatchConversionRequest;
 import com.example.exchangerate.models.BatchConversionResponse;
+import com.example.exchangerate.models.ConversionQueryParams;
 import com.example.exchangerate.models.ExchangeRateRequest;
 import com.example.exchangerate.models.ExchangeRateResponse;
 import com.example.exchangerate.models.RateCompareRequest;
@@ -59,6 +60,40 @@ public class ExchangeRateController {
         log.info("Received rate request: {}->{} amount={} | traceId={}",
                 from, to,
                 request.getAmount(), traceId);
+
+        return orchestrationService.getRate(request)
+                .thenApply(response -> {
+                    if (response.getStatus().startsWith("FAILED")) {
+                        throw new ResponseStatusException(
+                                HttpStatus.SERVICE_UNAVAILABLE,
+                                "No provider could fulfill the request: " + response.getStatus());
+                    }
+                    return response;
+                });
+    }
+
+    @GetMapping("/rates/convert")
+    public CompletableFuture<ExchangeRateResponse> convertViaGet(
+            @Valid ConversionQueryParams queryParams) {
+
+        ExchangeRateRequest request = queryParams.toExchangeRateRequest();
+        String from = request.getFromCurrency();
+        String to = request.getToCurrency();
+
+        if (!currencyCacheService.isSupported(from)) {
+            throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Unsupported currency: " + from);
+        }
+        if (!currencyCacheService.isSupported(to)) {
+            throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Unsupported currency: " + to);
+        }
+        if (request.getAmount().compareTo(BigDecimal.valueOf(batchConfig.getMaxAmount())) > 0) {
+            throw new ResponseStatusException(HttpStatus.BAD_REQUEST,
+                    "Amount exceeds maximum of " + batchConfig.getMaxAmount());
+        }
+
+        String traceId = MDC.get("X-B3-TraceId");
+        log.info("Received GET rate conversion: {}->{} amount={} | traceId={}",
+                from, to, request.getAmount(), traceId);
 
         return orchestrationService.getRate(request)
                 .thenApply(response -> {
