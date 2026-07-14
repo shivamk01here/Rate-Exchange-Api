@@ -12,6 +12,7 @@ Multi-provider exchange rate API built with Spring Boot 2.7 & WebFlux, inspired 
 | POST | `/api/rates/batch` | Batch multi-currency conversion |
 | POST | `/api/rates/compare` | Compare rates across providers |
 | POST | `/api/rates/pipe` | Pipe-delimited rate request |
+| GET | `/api/rates/convert?from=&to=&amount=` | Quick conversion via query parameters |
 | GET | `/api/rates/result?data=` | Handle redirect from pipe-format request |
 
 ### Currencies
@@ -131,6 +132,7 @@ The API uses per-client sliding window rate limiting to protect against abuse.
 | `/api/rates` | 30 per minute |
 | `/api/rates/batch` | 10 per minute |
 | `/api/rates/compare` | 20 per minute |
+| `/api/rates/convert` | 30 per minute |
 | All others | 100 per minute |
 
 ### Bypassed Endpoints
