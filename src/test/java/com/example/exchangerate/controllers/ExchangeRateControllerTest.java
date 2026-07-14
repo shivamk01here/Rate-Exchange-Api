@@ -1,6 +1,7 @@
 package com.example.exchangerate.controllers;
 
 import com.example.exchangerate.config.BatchConfig;
+import com.example.exchangerate.models.ConversionQueryParams;
 import com.example.exchangerate.models.CurrencyInfo;
 import com.example.exchangerate.models.ProviderCodes;
 import com.example.exchangerate.models.ProviderRateDetail;
@@ -93,5 +94,66 @@ class ExchangeRateControllerTest {
                 .build();
 
         assertThrows(ResponseStatusException.class, () -> controller.compareRates(request).join());
+    }
+
+    @Test
+    void convertViaGet_returnsResponseForValidParams() {
+        ConversionQueryParams params = ConversionQueryParams.builder()
+                .from("USD")
+                .to("INR")
+                .amount(new BigDecimal("100"))
+                .build();
+
+        ExchangeRateResponse expected = ExchangeRateResponse.builder()
+                .providerCode(ProviderCodes.EXCHANGE_RATE_API)
+                .fromCurrency("USD")
+                .toCurrency("INR")
+                .amount(new BigDecimal("100"))
+                .rate(new BigDecimal("83.45"))
+                .convertedAmount(new BigDecimal("8345.00"))
+                .status("SUCCESS")
+                .build();
+
+        when(orchestrationService.getRate(any())).thenReturn(CompletableFuture.completedFuture(expected));
+
+        ExchangeRateResponse response = controller.convertViaGet(params).join();
+
+        assertEquals("USD", response.getFromCurrency());
+        assertEquals("INR", response.getToCurrency());
+        assertEquals(new BigDecimal("83.45"), response.getRate());
+        assertEquals("SUCCESS", response.getStatus());
+    }
+
+    @Test
+    void convertViaGet_throwsForUnsupportedFromCurrency() {
+        ConversionQueryParams params = ConversionQueryParams.builder()
+                .from("XYZ")
+                .to("USD")
+                .amount(new BigDecimal("100"))
+                .build();
+
+        assertThrows(ResponseStatusException.class, () -> controller.convertViaGet(params).join());
+    }
+
+    @Test
+    void convertViaGet_throwsForUnsupportedToCurrency() {
+        ConversionQueryParams params = ConversionQueryParams.builder()
+                .from("USD")
+                .to("XYZ")
+                .amount(new BigDecimal("100"))
+                .build();
+
+        assertThrows(ResponseStatusException.class, () -> controller.convertViaGet(params).join());
+    }
+
+    @Test
+    void convertViaGet_throwsForAmountExceedingMax() {
+        ConversionQueryParams params = ConversionQueryParams.builder()
+                .from("USD")
+                .to("EUR")
+                .amount(new BigDecimal("999999999"))
+                .build();
+
+        assertThrows(ResponseStatusException.class, () -> controller.convertViaGet(params).join());
     }
 }
