@@ -55,6 +55,20 @@ Multi-provider exchange rate API built with Spring Boot 2.7 & WebFlux, inspired 
 | DELETE | `/api/favorites/{id}` | Delete a favorite |
 | GET | `/api/favorites/rates` | Fetch current rates for all favorites |
 
+### Portfolio Tracker
+
+| Method | Path | Description |
+|--------|------|-------------|
+| POST | `/api/portfolio` | Create a portfolio |
+| GET | `/api/portfolio` | List all portfolios |
+| GET | `/api/portfolio/{id}` | Get portfolio by ID |
+| PUT | `/api/portfolio/{id}` | Update a portfolio |
+| DELETE | `/api/portfolio/{id}` | Delete a portfolio |
+| POST | `/api/portfolio/{id}/holdings` | Add a currency holding |
+| DELETE | `/api/portfolio/{id}/holdings/{currency}` | Remove a currency holding |
+| GET | `/api/portfolio/{id}/value` | Get real-time portfolio valuation |
+| GET | `/api/portfolio/count` | Get total portfolio count |
+
 ### Rate Trends
 
 | Method | Path | Description |
@@ -133,12 +147,15 @@ The API uses per-client sliding window rate limiting to protect against abuse.
 | `/api/rates/batch` | 10 per minute |
 | `/api/rates/compare` | 20 per minute |
 | `/api/rates/convert` | 30 per minute |
+| `/api/portfolio` | 20 per minute |
+| `/api/portfolio/*/value` | 10 per minute |
 | All others | 100 per minute |
 
 ### Bypassed Endpoints
 - `/api/health`
 - `/api/version`
 - `/api/rate-limit`
+- `/api/portfolio/count`
 
 ### Response Headers
 Every response includes rate limit headers:
@@ -182,6 +199,40 @@ rate-trend:
   display-limit: 10
   stability-threshold-percent: 0.5
   cleanup-interval-minutes: 60
+```
+
+## Portfolio Tracking
+
+Create and manage multi-currency portfolios with real-time valuation. Add holdings in different currencies and get the total value converted to your base currency.
+
+### Example: Create Portfolio and Add Holdings
+```bash
+# Create a portfolio
+curl -X POST http://localhost:8080/api/portfolio \
+  -H "Content-Type: application/json" \
+  -d '{"name": "Travel Fund", "baseCurrency": "USD", "holdings": {"EUR": 500, "GBP": 300}}'
+
+# Add more holdings
+curl -X POST http://localhost:8080/api/portfolio/1/holdings \
+  -H "Content-Type: application/json" \
+  -d '{"currency": "JPY", "amount": 50000}'
+
+# Get real-time valuation
+curl http://localhost:8080/api/portfolio/1/value
+```
+```json
+{
+  "portfolioId": "1",
+  "portfolioName": "Travel Fund",
+  "baseCurrency": "USD",
+  "totalValue": "1450.7500",
+  "status": "SUCCESS",
+  "holdingValues": {
+    "EUR": { "amount": 500, "rate": 1.1, "convertedValue": 550, "status": "SUCCESS" },
+    "GBP": { "amount": 300, "rate": 1.27, "convertedValue": 381, "status": "SUCCESS" },
+    "JPY": { "amount": 50000, "rate": 0.0065, "convertedValue": 519.75, "status": "SUCCESS" }
+  }
+}
 ```
 
 ## Build & Run
