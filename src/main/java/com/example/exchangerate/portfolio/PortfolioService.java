@@ -1,7 +1,6 @@
 package com.example.exchangerate.portfolio;
 
 import com.example.exchangerate.models.ExchangeRateRequest;
-import com.example.exchangerate.models.ExchangeRateResponse;
 import com.example.exchangerate.services.ExchangeRateOrchestrationService;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -26,10 +25,22 @@ public class PortfolioService {
     private final ExchangeRateOrchestrationService orchestrationService;
 
     public CurrencyPortfolio createPortfolio(CurrencyPortfolio portfolio) {
+        validatePortfolio(portfolio);
         CurrencyPortfolio saved = portfolioRepository.save(portfolio);
         log.info("Portfolio created: id={} name={} baseCurrency={}",
                 saved.getId(), saved.getName(), saved.getBaseCurrency());
         return saved;
+    }
+
+    private void validatePortfolio(CurrencyPortfolio portfolio) {
+        if (portfolio.getHoldings() != null) {
+            for (Map.Entry<String, BigDecimal> entry : portfolio.getHoldings().entrySet()) {
+                if (entry.getValue() != null && entry.getValue().compareTo(BigDecimal.ZERO) <= 0) {
+                    throw new IllegalArgumentException(
+                            "Holding amount for " + entry.getKey() + " must be positive");
+                }
+            }
+        }
     }
 
     public Optional<CurrencyPortfolio> getPortfolio(String id) {
@@ -49,6 +60,9 @@ public class PortfolioService {
     }
 
     public CurrencyPortfolio updatePortfolio(String id, CurrencyPortfolio updated) {
+        if (updated.getHoldings() != null) {
+            validatePortfolio(updated);
+        }
         return portfolioRepository.findById(id)
                 .map(existing -> {
                     CurrencyPortfolio merged = CurrencyPortfolio.builder()
@@ -66,6 +80,9 @@ public class PortfolioService {
     }
 
     public CurrencyPortfolio addHolding(String id, String currency, BigDecimal amount) {
+        if (amount == null || amount.compareTo(BigDecimal.ZERO) <= 0) {
+            throw new IllegalArgumentException("Holding amount must be positive");
+        }
         return portfolioRepository.findById(id)
                 .map(existing -> {
                     Map<String, BigDecimal> holdings = new LinkedHashMap<>(existing.getHoldings());
