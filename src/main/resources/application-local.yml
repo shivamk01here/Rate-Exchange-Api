@@ -53,6 +53,11 @@ notification:
     default-provider: CONSOLE
     from: ExchangeRate
 
+portfolio:
+  max-portfolios: 10
+  enabled: true
+  max-holdings-per-portfolio: 30
+
 spring:
   mail:
     host: ${SPRING_MAIL_HOST:localhost}

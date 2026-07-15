@@ -53,3 +53,8 @@ notification:
     enabled: true
     default-provider: TWILIO
     from: ExchangeRate
+
+portfolio:
+  max-portfolios: 100
+  enabled: true
+  max-holdings-per-portfolio: 100

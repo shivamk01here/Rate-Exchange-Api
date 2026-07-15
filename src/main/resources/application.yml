@@ -59,6 +59,7 @@ rate-limit:
     - /api/health
     - /api/version
     - /api/rate-limit
+    - /api/portfolio/count
   endpoints:
     /api/rates:
       max-requests: 30
@@ -72,11 +73,22 @@ rate-limit:
     /api/rates/convert:
       max-requests: 30
       window: 1m
+    /api/portfolio:
+      max-requests: 20
+      window: 1m
+    /api/portfolio/*/value:
+      max-requests: 10
+      window: 1m
 
 favorites:
   max-favorites: 50
   enabled: true
   max-label-length: 100
+
+portfolio:
+  max-portfolios: 20
+  enabled: true
+  max-holdings-per-portfolio: 50
 
 rate-trend:
   enabled: true
