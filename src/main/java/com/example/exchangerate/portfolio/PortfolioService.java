@@ -105,6 +105,9 @@ public class PortfolioService {
         return portfolioRepository.findById(id)
                 .map(existing -> {
                     Map<String, BigDecimal> holdings = new LinkedHashMap<>(existing.getHoldings());
+                    if (!holdings.containsKey(currency)) {
+                        throw new IllegalArgumentException("Currency not found in portfolio: " + currency);
+                    }
                     holdings.remove(currency);
                     CurrencyPortfolio merged = CurrencyPortfolio.builder()
                             .id(existing.getId())
