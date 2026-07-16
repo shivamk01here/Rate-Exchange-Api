@@ -11,6 +11,6 @@ import lombok.NoArgsConstructor;
 @AllArgsConstructor
 public class SymbolResponse {
     private String code;
-    private String symol;
+    private String symbol;
     private String name;
 }

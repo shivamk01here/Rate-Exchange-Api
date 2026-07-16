@@ -1,5 +1,6 @@
 package com.example.exchangerate.controllers;
 
+import com.example.exchangerate.models.SymbolResponse;
 import com.example.exchangerate.services.SymbolLookupService;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -18,12 +19,15 @@ public class SymbolLookupController {
     private final SymbolLookupService symbolLookupService;
 
     @GetMapping("/{code}")
-    public Map<String, String> getSymbol(@PathVariable String code) {
+    public SymbolResponse getSymbol(@PathVariable String code) {
         String symbol = symbolLookupService.getSymbol(code);
         if (symbol == null) {
             throw new ResponseStatusException(HttpStatus.NOT_FOUND, "No symbol found for currency: " + code);
         }
-        return Map.of("code", code.toUpperCase(), "symbol", symbol);
+        return SymbolResponse.builder()
+                .code(code.toUpperCase())
+                .symbol(symbol)
+                .build();
     }
 
     @GetMapping
