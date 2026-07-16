@@ -23,6 +23,14 @@ Multi-provider exchange rate API built with Spring Boot 2.7 & WebFlux, inspired 
 | GET | `/api/currencies/search?q=` | Search currencies by code or name |
 | GET | `/api/currencies/{code}` | Get specific currency info |
 
+### Currency Symbol Lookup
+
+| Method | Path | Description |
+|--------|------|-------------|
+| GET | `/api/currencies/symbols` | List all currency symbols |
+| GET | `/api/currencies/symbols/{code}` | Get symbol for a currency code |
+| GET | `/api/currencies/symbols/check?symbol=` | Check if a symbol is known |
+
 ### Alerts
 
 | Method | Path | Description |
