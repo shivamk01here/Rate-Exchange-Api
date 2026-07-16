@@ -11,7 +11,7 @@ import java.util.Map;
 
 @Slf4j
 @RestController
-@RequestMapping("/api/symbol")
+@RequestMapping("/api/currencies/symbols")
 @RequiredArgsConstructor
 public class SymbolLookupController {
 
