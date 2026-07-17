@@ -22,6 +22,10 @@ import com.example.exchangerate.services.CacheMetricsCollector;
 import com.example.exchangerate.services.ExchangeRateOrchestrationService;
 import com.example.exchangerate.services.ProviderMetricsCollector;
 import com.example.exchangerate.services.RateCacheService;
+import com.example.exchangerate.trend.RateTrendConfig;
+import com.example.exchangerate.trend.RateTrendMetricsCollector;
+import com.example.exchangerate.trend.RateTrendRepository;
+import com.example.exchangerate.trend.RateTrendService;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 
@@ -73,8 +77,12 @@ class ExchangeRateOrchestrationServiceTest {
         var alertEvalService = new AlertEvaluationService(
                 new AlertRepository(), providerFactory,
                 new EmailService(null, new EmailConfig()), waAlertService);
+        var rateTrendConfig = new RateTrendConfig();
+        var rateTrendService = new RateTrendService(
+                new RateTrendRepository(), rateTrendConfig, new RateTrendMetricsCollector());
         orchestrationService = new ExchangeRateOrchestrationService(
-                providerFactory, auditService, rateCacheService, new ProviderMetricsCollector(), alertEvalService);
+                providerFactory, auditService, rateCacheService, new ProviderMetricsCollector(),
+                alertEvalService, rateTrendService, rateTrendConfig);
     }
 
     @Test
