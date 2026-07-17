@@ -24,6 +24,8 @@ import reactor.core.publisher.Mono;
 import javax.validation.Valid;
 import java.math.BigDecimal;
 import java.net.URI;
+import java.net.URLEncoder;
+import java.nio.charset.StandardCharsets;
 import java.util.concurrent.CompletableFuture;
 import java.util.stream.Collectors;
 
@@ -177,7 +179,7 @@ public class ExchangeRateController {
                     ServerHttpResponse httpResponse = exchange.getResponse();
                     httpResponse.setStatusCode(HttpStatus.FOUND);
                     httpResponse.getHeaders().setLocation(
-                            URI.create("/api/rates/result?data=" + response.toPipeFormat()));
+                            URI.create("/api/rates/result?data=" + URLEncoder.encode(response.toPipeFormat(), StandardCharsets.UTF_8)));
                     return httpResponse.setComplete();
                 });
     }
