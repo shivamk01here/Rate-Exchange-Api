@@ -127,7 +127,7 @@ public class PortfolioService {
         return portfolioRepository.count();
     }
 
-    public CompletableFuture<PortfolioValuation>valuatePortfolio(String id) {
+    public CompletableFuture<PortfolioValuation> valuatePortfolio(String id) {
         return portfolioRepository.findById(id)
                 .map(portfolio -> {
                     String baseCurrency = portfolio.getBaseCurrency();
