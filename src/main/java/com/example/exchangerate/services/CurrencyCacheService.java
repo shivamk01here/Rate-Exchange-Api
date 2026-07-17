@@ -17,8 +17,8 @@ public class CurrencyCacheService {
     private final CurrencyService currencyService;
     private final CurrencyMetricsCollector metrics;
 
-    private Collection<CurrencyInfo> cachedList;
-    private Instant listExpiresAt;
+    private volatile Collection<CurrencyInfo> cachedList;
+    private volatile Instant listExpiresAt;
 
     private final ConcurrentHashMap<String, CachedCurrency> currencyCache = new ConcurrentHashMap<>();
 
