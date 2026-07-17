@@ -7,6 +7,7 @@ import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 
+import java.math.BigDecimal;
 import java.util.List;
 import java.util.Optional;
 import java.util.concurrent.CompletableFuture;
@@ -81,6 +82,7 @@ public class FavoritePairService {
                     ExchangeRateRequest request = ExchangeRateRequest.builder()
                             .fromCurrency(fav.getFromCurrency())
                             .toCurrency(fav.getToCurrency())
+                            .amount(BigDecimal.ONE)
                             .build();
                     return orchestrationService.getRate(request)
                             .thenApply(response -> FavoriteRateResult.builder()
