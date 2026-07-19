@@ -6,6 +6,7 @@ import com.example.exchangerate.models.ProviderCodes;
 import com.example.exchangerate.providers.ExchangeRateProvider;
 import com.example.exchangerate.providers.ProviderFactory;
 import com.example.exchangerate.notification.EmailService;
+import com.example.exchangerate.webhook.WebhookDeliveryService;
 import com.example.exchangerate.whatsapp.WhatsAppAlertService;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -25,6 +26,7 @@ public class AlertEvaluationService {
     private final ProviderFactory providerFactory;
     private final EmailService emailService;
     private final WhatsAppAlertService whatsAppAlertService;
+    private final WebhookDeliveryService webhookDeliveryService;
 
     public void evaluateAllAlerts() {
         List<Alert> enabledAlerts = alertRepository.findEnabledAlerts();
@@ -68,6 +70,7 @@ public class AlertEvaluationService {
 
             emailService.sendRateAlert(alert, currentRate);
             whatsAppAlertService.sendRateAlert(alert, currentRate);
+            webhookDeliveryService.deliverAlertTriggered(alert, currentRate);
             alertRepository.updateLastTriggered(alert.getId(), Instant.now());
         }
     }
