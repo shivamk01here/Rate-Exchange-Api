@@ -1,6 +1,7 @@
 package com.example.exchangerate.controllers;
 
 import com.example.exchangerate.webhook.Webhook;
+import com.example.exchangerate.webhook.WebhookMetricsCollector;
 import com.example.exchangerate.webhook.WebhookService;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -20,6 +21,7 @@ import java.util.Map;
 public class WebhookController {
 
     private final WebhookService webhookService;
+    private final WebhookMetricsCollector metricsCollector;
 
     @PostMapping(consumes = MediaType.APPLICATION_JSON_VALUE)
     public Webhook createWebhook(@Valid @RequestBody Webhook webhook) {
@@ -67,5 +69,10 @@ public class WebhookController {
     @GetMapping("/count")
     public Map<String, Object> getWebhookCount() {
         return Map.of("count", webhookService.getWebhookCount());
+    }
+
+    @GetMapping("/stats")
+    public Map<String, Object> getWebhookStats() {
+        return metricsCollector.getStats();
     }
 }

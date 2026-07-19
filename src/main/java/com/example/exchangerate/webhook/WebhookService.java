@@ -13,9 +13,11 @@ import java.util.Optional;
 public class WebhookService {
 
     private final WebhookRepository webhookRepository;
+    private final WebhookMetricsCollector metricsCollector;
 
     public Webhook createWebhook(Webhook webhook) {
         Webhook saved = webhookRepository.save(webhook);
+        metricsCollector.recordCreate();
         log.info("Webhook created: id={} url={} events={}",
                 saved.getId(), saved.getUrl(), saved.getEvents());
         return saved;
@@ -36,6 +38,7 @@ public class WebhookService {
     public boolean deleteWebhook(String id) {
         boolean deleted = webhookRepository.deleteById(id);
         if (deleted) {
+            metricsCollector.recordDelete();
             log.info("Webhook deleted: id={}", id);
         }
         return deleted;
