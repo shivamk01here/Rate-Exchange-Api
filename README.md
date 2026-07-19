@@ -116,6 +116,48 @@ Multi-provider exchange rate API built with Spring Boot 2.7 & WebFlux, inspired 
 | POST | `/api/whatsapp/send` | Send WhatsApp via default provider |
 | POST | `/api/whatsapp/send/{provider}` | Send WhatsApp via specified provider |
 
+### Webhooks
+
+| Method | Path | Description |
+|--------|------|-------------|
+| POST | `/api/webhooks` | Create a webhook subscription |
+| GET | `/api/webhooks` | List all webhooks |
+| GET | `/api/webhooks/{id}` | Get webhook by ID |
+| GET | `/api/webhooks/by-event?event=` | Get webhooks by event type |
+| DELETE | `/api/webhooks/{id}` | Delete a webhook |
+| PATCH | `/api/webhooks/{id}/toggle` | Enable/disable a webhook |
+| GET | `/api/webhooks/count` | Get total webhook count |
+| GET | `/api/webhooks/stats` | Get webhook delivery metrics |
+
+#### Webhook Event Types
+- `RATE_ALERT_TRIGGERED` - Fires when any rate alert triggers
+- `RATE_ABOVE_THRESHOLD` - Fires when rate goes above threshold
+- `RATE_BELOW_THRESHOLD` - Fires when rate goes below threshold
+
+#### Example: Create a Webhook
+```bash
+curl -X POST http://localhost:8080/api/webhooks \
+  -H "Content-Type: application/json" \
+  -d '{"url": "https://example.com/webhook", "events": ["RATE_ALERT_TRIGGERED"], "secret": "my-secret-key", "enabled": true}'
+```
+
+#### Webhook Payload
+When triggered, the webhook receives a POST with:
+```json
+{
+  "event": "RATE_ALERT_TRIGGERED",
+  "alertId": "1",
+  "fromCurrency": "USD",
+  "toCurrency": "INR",
+  "condition": "RATE_ABOVE",
+  "threshold": 85.00,
+  "currentRate": 86.25,
+  "timestamp": "2026-07-19T10:30:00Z"
+}
+```
+
+The webhook includes an `X-Webhook-Secret` header for signature verification when a secret is configured.
+
 ## Rate Trend Tracking
 
 The API automatically tracks exchange rate changes over time and provides trend analysis for any currency pair.
