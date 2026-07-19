@@ -10,6 +10,8 @@ import org.springframework.web.bind.support.WebExchangeBindException;
 import org.springframework.web.method.annotation.MethodArgumentTypeMismatchException;
 import org.springframework.web.server.ResponseStatusException;
 
+import javax.validation.ConstraintViolation;
+import javax.validation.ConstraintViolationException;
 import java.util.Map;
 import java.util.stream.Collectors;
 
@@ -45,6 +47,17 @@ public class ExportExceptionHandler {
     public ResponseEntity<Map<String, Object>> handleResponseStatus(ResponseStatusException ex) {
         return ResponseEntity.status(ex.getStatus()).body(Map.of(
                 "error", ex.getReason() != null ? ex.getReason() : ex.getStatus().getReasonPhrase()));
+    }
+
+    @ExceptionHandler(ConstraintViolationException.class)
+    public ResponseEntity<Map<String, Object>> handleConstraintViolation(ConstraintViolationException ex) {
+        String details = ex.getConstraintViolations().stream()
+                .map(ConstraintViolation::getMessage)
+                .collect(Collectors.joining(", "));
+        log.warn("Constraint violation: {}", details);
+        return ResponseEntity.badRequest().body(Map.of(
+                "error", "Validation failed",
+                "details", details));
     }
 
     @ExceptionHandler(Exception.class)

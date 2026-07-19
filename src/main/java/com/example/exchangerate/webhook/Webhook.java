@@ -5,6 +5,8 @@ import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 
+import javax.validation.constraints.NotBlank;
+import javax.validation.constraints.NotEmpty;
 import java.time.Instant;
 import java.util.List;
 
@@ -15,9 +17,15 @@ import java.util.List;
 public class Webhook {
 
     private String id;
+
+    @NotBlank(message = "URL is required")
     private String url;
+
     private String secret;
+
+    @NotEmpty(message = "At least one event is required")
     private List<WebhookEvent> events;
+
     private boolean enabled;
     @Builder.Default private Instant createdAt = Instant.now();
     private Instant lastTriggeredAt;
