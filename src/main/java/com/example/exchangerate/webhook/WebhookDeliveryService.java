@@ -22,6 +22,7 @@ public class WebhookDeliveryService {
     private final WebhookRepository webhookRepository;
     private final WebClient.Builder webClientBuilder;
     private final WebhookMetricsCollector metricsCollector;
+    private final WebhookDeliveryLogRepository deliveryLogRepository;
 
     public void deliverAlertTriggered(Alert alert, BigDecimal currentRate) {
         List<Webhook> webhooks = webhookRepository.findEnabledByEvent(Webhook.WebhookEvent.RATE_ALERT_TRIGGERED);
@@ -82,18 +83,44 @@ public class WebhookDeliveryService {
                                     webhook.getId(), webhook.getUrl(), response.getStatusCode());
                             metricsCollector.recordDeliverySuccess();
                             webhookRepository.updateLastTriggered(webhook.getId(), Instant.now());
+                            deliveryLogRepository.save(WebhookDeliveryLog.builder()
+                                    .webhookId(webhook.getId())
+                                    .webhookUrl(webhook.getUrl())
+                                    .event("RATE_ALERT_TRIGGERED")
+                                    .statusCode(response.getStatusCodeValue())
+                                    .success(true)
+                                    .deliveredAt(Instant.now())
+                                    .build());
                         })
                         .doOnError(error -> {
                             log.warn("Webhook delivery failed: id={} url={} error={}",
                                     webhook.getId(), webhook.getUrl(), error.getMessage());
                             metricsCollector.recordDeliveryFailure();
                             webhookRepository.incrementFailureCount(webhook.getId());
+                            deliveryLogRepository.save(WebhookDeliveryLog.builder()
+                                    .webhookId(webhook.getId())
+                                    .webhookUrl(webhook.getUrl())
+                                    .event("RATE_ALERT_TRIGGERED")
+                                    .statusCode(0)
+                                    .success(false)
+                                    .errorMessage(error.getMessage())
+                                    .deliveredAt(Instant.now())
+                                    .build());
                         })
                         .subscribe();
             } catch (Exception e) {
                 log.error("Webhook delivery error: id={} url={}", webhook.getId(), webhook.getUrl(), e);
                 metricsCollector.recordDeliveryFailure();
                 webhookRepository.incrementFailureCount(webhook.getId());
+                deliveryLogRepository.save(WebhookDeliveryLog.builder()
+                        .webhookId(webhook.getId())
+                        .webhookUrl(webhook.getUrl())
+                        .event("RATE_ALERT_TRIGGERED")
+                        .statusCode(0)
+                        .success(false)
+                        .errorMessage(e.getMessage())
+                        .deliveredAt(Instant.now())
+                        .build());
             }
         });
     }

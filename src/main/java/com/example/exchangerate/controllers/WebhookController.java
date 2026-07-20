@@ -1,6 +1,8 @@
 package com.example.exchangerate.controllers;
 
 import com.example.exchangerate.webhook.Webhook;
+import com.example.exchangerate.webhook.WebhookDeliveryLog;
+import com.example.exchangerate.webhook.WebhookDeliveryLogRepository;
 import com.example.exchangerate.webhook.WebhookMetricsCollector;
 import com.example.exchangerate.webhook.WebhookService;
 import lombok.RequiredArgsConstructor;
@@ -22,6 +24,7 @@ public class WebhookController {
 
     private final WebhookService webhookService;
     private final WebhookMetricsCollector metricsCollector;
+    private final WebhookDeliveryLogRepository deliveryLogRepository;
 
     @PostMapping(consumes = MediaType.APPLICATION_JSON_VALUE)
     public Webhook createWebhook(@Valid @RequestBody Webhook webhook) {
@@ -74,5 +77,15 @@ public class WebhookController {
     @GetMapping("/stats")
     public Map<String, Object> getWebhookStats() {
         return metricsCollector.getStats();
+    }
+
+    @GetMapping("/delivery-logs")
+    public List<WebhookDeliveryLog> getDeliveryLogs(@RequestParam(defaultValue = "100") int limit) {
+        return deliveryLogRepository.findRecent(limit);
+    }
+
+    @GetMapping("/delivery-logs/{webhookId}")
+    public List<WebhookDeliveryLog> getDeliveryLogsByWebhook(@PathVariable String webhookId) {
+        return deliveryLogRepository.findByWebhookId(webhookId);
     }
 }
