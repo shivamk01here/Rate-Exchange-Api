@@ -17,6 +17,26 @@ public class EmailService {
     private final JavaMailSender mailSender;
     private final EmailConfig emailConfig;
 
+    public void sendSimpleMessage(String to, String subject, String text) {
+        if (!emailConfig.isEnabled()) {
+            log.debug("Email notifications disabled, skipping message to {}", to);
+            return;
+        }
+
+        try {
+            SimpleMailMessage message = new SimpleMailMessage();
+            message.setFrom(emailConfig.getFrom());
+            message.setTo(to);
+            message.setSubject(subject);
+            message.setText(text);
+
+            mailSender.send(message);
+            log.info("Email sent to {}: subject={}", to, subject);
+        } catch (Exception e) {
+            log.error("Failed to send email to {}: {}", to, e.getMessage());
+        }
+    }
+
     public void sendRateAlert(Alert alert, BigDecimal currentRate) {
         if (!emailConfig.isEnabled()) {
             log.debug("Email notifications disabled, skipping alert {}", alert.getId());
