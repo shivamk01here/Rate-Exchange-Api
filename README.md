@@ -158,6 +158,76 @@ When triggered, the webhook receives a POST with:
 
 The webhook includes an `X-Webhook-Secret` header for signature verification when a secret is configured.
 
+#### Webhook Delivery Logs
+| Method | Path | Description |
+|--------|------|-------------|
+| GET | `/api/webhooks/delivery-logs?limit=` | Recent delivery logs |
+| GET | `/api/webhooks/delivery-logs/{webhookId}` | Delivery logs for a specific webhook |
+
+### API Keys
+
+| Method | Path | Description |
+|--------|------|-------------|
+| POST | `/api/keys` | Create an API key |
+| GET | `/api/keys` | List all API keys |
+| GET | `/api/keys/{id}` | Get API key by ID |
+| GET | `/api/keys/validate?key=` | Validate an API key |
+| DELETE | `/api/keys/{id}` | Delete an API key |
+| PATCH | `/api/keys/{id}/toggle` | Enable/disable an API key |
+| GET | `/api/keys/count` | Get total API key count |
+
+#### Example: Create an API Key
+```bash
+curl -X POST http://localhost:8080/api/keys \
+  -H "Content-Type: application/json" \
+  -d '{"label": "My App Key", "requestsPerMinute": 60, "enabled": true}'
+```
+The API auto-generates a key prefixed with `ak-` if no key value is provided.
+
+### Scheduled Reports
+
+| Method | Path | Description |
+|--------|------|-------------|
+| POST | `/api/reports` | Create a scheduled report |
+| GET | `/api/reports` | List all scheduled reports |
+| GET | `/api/reports/{id}` | Get report by ID |
+| DELETE | `/api/reports/{id}` | Delete a report |
+| PATCH | `/api/reports/{id}/toggle` | Enable/disable a report |
+| GET | `/api/reports/count` | Get total report count |
+
+#### Example: Create a Daily Report
+```bash
+curl -X POST http://localhost:8080/api/reports \
+  -H "Content-Type: application/json" \
+  -d '{"name": "Daily INR Update", "cronExpression": "0 8 * * * ?", "currencyPairs": [{"from": "USD", "to": "INR"}, {"from": "EUR", "to": "INR"}], "email": "user@example.com", "enabled": true}'
+```
+Reports are generated at the specified cron schedule and emailed to the configured recipient.
+
+### Conversion Bookmarks
+
+| Method | Path | Description |
+|--------|------|-------------|
+| POST | `/api/bookmarks` | Create a conversion bookmark |
+| GET | `/api/bookmarks` | List all bookmarks |
+| GET | `/api/bookmarks/{id}` | Get bookmark by ID |
+| GET | `/api/bookmarks/by-pair?from=&to=` | Find bookmarks by currency pair |
+| GET | `/api/bookmarks/by-name?name=` | Find bookmarks by name |
+| PUT | `/api/bookmarks/{id}` | Update a bookmark |
+| DELETE | `/api/bookmarks/{id}` | Delete a bookmark |
+| POST | `/api/bookmarks/{id}/execute` | Execute a bookmark conversion |
+| GET | `/api/bookmarks/count` | Get total bookmark count |
+
+#### Example: Create and Execute a Bookmark
+```bash
+# Create
+curl -X POST http://localhost:8080/api/bookmarks \
+  -H "Content-Type: application/json" \
+  -d '{"name": "USD to INR Check", "fromCurrency": "USD", "toCurrency": "INR", "amount": 100}'
+
+# Execute
+curl -X POST http://localhost:8080/api/bookmarks/1/execute
+```
+
 ## Rate Trend Tracking
 
 The API automatically tracks exchange rate changes over time and provides trend analysis for any currency pair.
