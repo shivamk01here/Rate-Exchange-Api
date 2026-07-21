@@ -228,6 +228,38 @@ curl -X POST http://localhost:8080/api/bookmarks \
 curl -X POST http://localhost:8080/api/bookmarks/1/execute
 ```
 
+### Currency Calculator
+
+| Method | Path | Description |
+|--------|------|-------------|
+| POST | `/api/calculator` | Perform a conversion calculation |
+| GET | `/api/calculator` | List all calculation history |
+| GET | `/api/calculator/{id}` | Get calculation by ID |
+| GET | `/api/calculator/by-pair?from=&to=` | Find calculations by currency pair |
+| GET | `/api/calculator/favorites` | Get favorited calculations |
+| PATCH | `/api/calculator/{id}/favorite` | Toggle favorite on a calculation |
+| POST | `/api/calculator/{id}/reverse` | Reverse a conversion (swap from/to) |
+| POST | `/api/calculator/{id}/recalculate` | Recalculate with current rates |
+| DELETE | `/api/calculator/{id}` | Delete a calculation entry |
+| DELETE | `/api/calculator` | Clear all calculation history |
+| GET | `/api/calculator/count` | Get total calculation count |
+
+#### Example: Perform a Calculation
+```bash
+curl -X POST http://localhost:8080/api/calculator \
+  -H "Content-Type: application/json" \
+  -d '{"fromCurrency": "USD", "toCurrency": "INR", "amount": 100}'
+```
+
+#### Example: Toggle Favorite and Reverse
+```bash
+# Toggle favorite
+curl -X PATCH http://localhost:8080/api/calculator/1/favorite
+
+# Reverse a conversion
+curl -X POST http://localhost:8080/api/calculator/1/reverse
+```
+
 ## Rate Trend Tracking
 
 The API automatically tracks exchange rate changes over time and provides trend analysis for any currency pair.
