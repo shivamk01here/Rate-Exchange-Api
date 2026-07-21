@@ -110,3 +110,10 @@ notification:
     enabled: true
     default-provider: CONSOLE
     from: ExchangeRate
+
+calculator:
+  enabled: true
+  max-history-size: 100
+  decimal-scale: 4
+  auto-clean-enabled: false
+  auto-clean-interval-ms: 3600000
