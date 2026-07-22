@@ -44,8 +44,9 @@ public class WebhookDeliveryLogRepository {
     }
 
     public List<WebhookDeliveryLog> findRecent(int limit) {
+        int safeLimit = Math.max(0, limit);
         int size = logs.size();
-        int fromIndex = Math.max(0, size - limit);
+        int fromIndex = Math.max(0, size - safeLimit);
         return new ArrayList<>(logs.subList(fromIndex, size));
     }
 
