@@ -163,7 +163,12 @@ public class ExchangeRateController {
             @RequestBody String pipeRequest,
             ServerWebExchange exchange) {
 
-        ExchangeRateRequest request = ExchangeRateRequest.fromPipeFormat(pipeRequest);
+        ExchangeRateRequest request;
+        try {
+            request = ExchangeRateRequest.fromPipeFormat(pipeRequest);
+        } catch (IllegalArgumentException e) {
+            throw new ResponseStatusException(HttpStatus.BAD_REQUEST, e.getMessage());
+        }
 
         if (!currencyCacheService.isSupported(request.getFromCurrency())) {
             throw new ResponseStatusException(HttpStatus.BAD_REQUEST,
