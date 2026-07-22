@@ -88,6 +88,7 @@ public class AlertEvaluationService {
                 log.info("Alert {} triggered inline: rate={}", alert.getId(), response.getRate());
                 emailService.sendRateAlert(alert, response.getRate());
                 whatsAppAlertService.sendRateAlert(alert, response.getRate());
+                webhookDeliveryService.deliverAlertTriggered(alert, response.getRate());
                 alertRepository.updateLastTriggered(alert.getId(), Instant.now());
             }
         }
