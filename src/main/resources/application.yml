@@ -117,3 +117,6 @@ calculator:
   decimal-scale: 4
   auto-clean-enabled: false
   auto-clean-interval-ms: 3600000
+  summary-enabled: true
+  summary-top-pairs-limit: 5
+  summary-top-providers-limit: 5
