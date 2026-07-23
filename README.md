@@ -260,6 +260,33 @@ curl -X PATCH http://localhost:8080/api/calculator/1/favorite
 curl -X POST http://localhost:8080/api/calculator/1/reverse
 ```
 
+### Calculator Summary
+
+| Method | Path | Description |
+|--------|------|-------------|
+| GET | `/api/calculator/summary` | Get aggregated calculator statistics |
+| GET | `/api/calculator/summary/pairs` | Get currency pair frequency map |
+| GET | `/api/calculator/summary/providers` | Get provider usage frequency map |
+
+#### Example: Get Calculator Summary
+```bash
+curl http://localhost:8080/api/calculator/summary
+```
+```json
+{
+  "totalConversions": 15,
+  "favoriteCount": 3,
+  "totalAmountConverted": "2500.00",
+  "averageRate": "83.7500",
+  "mostUsedPair": "USD/INR",
+  "mostUsedProvider": "EXCHANGE_RATE_API",
+  "pairFrequency": { "USD/INR": 8, "EUR/GBP": 4, "GBP/USD": 3 },
+  "providerFrequency": { "EXCHANGE_RATE_API": 10, "OPEN_EXCHANGE_RATES": 5 },
+  "uniqueCurrencies": ["EUR", "GBP", "INR", "USD"],
+  "generatedAt": "2026-07-23T10:30:00Z"
+}
+```
+
 ## Rate Trend Tracking
 
 The API automatically tracks exchange rate changes over time and provides trend analysis for any currency pair.
