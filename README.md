@@ -287,6 +287,49 @@ curl http://localhost:8080/api/calculator/summary
 }
 ```
 
+### Conversion History
+
+| Method | Path | Description |
+|--------|------|-------------|
+| POST | `/api/history` | Record a conversion to history |
+| GET | `/api/history?page=&size=` | Get paginated conversion history |
+| GET | `/api/history/{id}` | Get history entry by ID |
+| GET | `/api/history/by-pair?from=&to=` | Get history by currency pair |
+| GET | `/api/history/by-status?status=` | Get history by status |
+| GET | `/api/history/count?from=&to=` | Get total or pair-specific count |
+| GET | `/api/history/statistics` | Get conversion statistics |
+| GET | `/api/history/recent-activity?hours=` | Get recent activity summary |
+| DELETE | `/api/history/{id}` | Delete a history entry |
+| DELETE | `/api/history` | Clear all history |
+
+#### Example: Get Conversion Statistics
+```bash
+curl http://localhost:8080/api/history/statistics
+```
+```json
+{
+  "totalConversions": 42,
+  "averageRate": "83.750000",
+  "totalVolume": "12500.00",
+  "successRate": "95.2400",
+  "conversionsByPair": { "USD/INR": 25, "EUR/GBP": 10, "GBP/USD": 7 }
+}
+```
+
+#### Example: Get Recent Activity
+```bash
+curl http://localhost:8080/api/history/recent-activity?hours=24
+```
+```json
+{
+  "periodHours": 24,
+  "totalConversions": 15,
+  "successCount": 14,
+  "failureCount": 1,
+  "totalVolume": "3200.00"
+}
+```
+
 ## Rate Trend Tracking
 
 The API automatically tracks exchange rate changes over time and provides trend analysis for any currency pair.
