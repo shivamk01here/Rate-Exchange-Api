@@ -1,11 +1,15 @@
 package com.example.exchangerate.controllers;
 
 import com.example.exchangerate.config.BatchConfig;
+import com.example.exchangerate.history.ConversionHistoryEntry;
+import com.example.exchangerate.history.ConversionHistoryConfig;
+import com.example.exchangerate.history.ConversionHistoryService;
 import com.example.exchangerate.models.BatchConversionRequest;
 import com.example.exchangerate.models.BatchConversionResponse;
 import com.example.exchangerate.models.ConversionQueryParams;
 import com.example.exchangerate.models.ExchangeRateRequest;
 import com.example.exchangerate.models.ExchangeRateResponse;
+import com.example.exchangerate.models.ProviderCodes;
 import com.example.exchangerate.models.RateCompareRequest;
 import com.example.exchangerate.models.RateCompareResponse;
 import com.example.exchangerate.services.CurrencyCacheService;
@@ -38,6 +42,8 @@ public class ExchangeRateController {
     private final ExchangeRateOrchestrationService orchestrationService;
     private final CurrencyCacheService currencyCacheService;
     private final BatchConfig batchConfig;
+    private final ConversionHistoryService historyService;
+    private final ConversionHistoryConfig historyConfig;
 
     @PostMapping(value = "/rates", consumes = MediaType.APPLICATION_JSON_VALUE)
     public CompletableFuture<ExchangeRateResponse> getRate(
@@ -70,6 +76,7 @@ public class ExchangeRateController {
                                 HttpStatus.SERVICE_UNAVAILABLE,
                                 "No provider could fulfill the request: " + response.getStatus());
                     }
+                    recordToHistory(request, response);
                     return response;
                 });
     }
@@ -104,6 +111,7 @@ public class ExchangeRateController {
                                 HttpStatus.SERVICE_UNAVAILABLE,
                                 "No provider could fulfill the request: " + response.getStatus());
                     }
+                    recordToHistory(request, response);
                     return response;
                 });
     }
@@ -187,5 +195,25 @@ public class ExchangeRateController {
                             URI.create("/api/rates/result?data=" + URLEncoder.encode(response.toPipeFormat(), StandardCharsets.UTF_8)));
                     return httpResponse.setComplete();
                 });
+    }
+
+    private void recordToHistory(ExchangeRateRequest request, ExchangeRateResponse response) {
+        if (!historyConfig.isEnabled()) {
+            return;
+        }
+        try {
+            ConversionHistoryEntry entry = ConversionHistoryEntry.builder()
+                    .fromCurrency(request.getFromCurrency())
+                    .toCurrency(request.getToCurrency())
+                    .amount(request.getAmount())
+                    .rate(response.getRate())
+                    .convertedAmount(response.getConvertedAmount())
+                    .provider(response.getProviderCode() != null ? response.getProviderCode().name() : null)
+                    .status(response.getStatus())
+                    .build();
+            historyService.recordConversion(entry);
+        } catch (Exception e) {
+            log.warn("Failed to record conversion to history: {}", e.getMessage());
+        }
     }
 }
