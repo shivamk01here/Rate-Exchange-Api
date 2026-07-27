@@ -16,6 +16,7 @@ import com.example.exchangerate.alert.AlertEvaluationService;
 import com.example.exchangerate.alert.AlertRepository;
 import com.example.exchangerate.notification.EmailConfig;
 import com.example.exchangerate.notification.EmailService;
+import com.example.exchangerate.webhook.WebhookDeliveryService;
 import com.example.exchangerate.whatsapp.WhatsAppAlertService;
 import com.example.exchangerate.whatsapp.WhatsAppConfig;
 import com.example.exchangerate.whatsapp.WhatsAppService;
@@ -76,7 +77,8 @@ class ExchangeRateCompareServiceTest {
         var waAlertService = new WhatsAppAlertService(waService, waConfig);
         var alertEvalService = new AlertEvaluationService(
                 new AlertRepository(), providerFactory,
-                new EmailService(null, new EmailConfig()), waAlertService);
+                new EmailService(null, new EmailConfig()), waAlertService,
+                new WebhookDeliveryService(null, null, null, null));
         var rateTrendConfig = new RateTrendConfig();
         var rateTrendService = new RateTrendService(
                 new RateTrendRepository(), rateTrendConfig, new RateTrendMetricsCollector());

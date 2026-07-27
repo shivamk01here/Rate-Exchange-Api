@@ -37,7 +37,7 @@ class AuditControllerTest {
         auditService = new AuditService(repository, new AuditConfig());
         csvExportService = new CsvExportService();
         jsonExportService = new JsonExportService(new ExportConfig());
-        controller = new AuditController(auditService, csvExportService, jsonExportService);
+        controller = new AuditController(auditService, csvExportService, jsonExportService, new ExportConfig());
         objectMapper = new ObjectMapper();
 
         for (int i = 0; i < 15; i++) {
@@ -136,7 +136,7 @@ class AuditControllerTest {
     void exportCsv_emptyHistoryReturnsOnlyHeader() {
         repository = new AuditRepository();
         auditService = new AuditService(repository, new AuditConfig());
-        controller = new AuditController(auditService, csvExportService, jsonExportService);
+        controller = new AuditController(auditService, csvExportService, jsonExportService, new ExportConfig());
 
         var response = controller.exportCsv(null, null, null, null);
         String csv = response.getBody();
@@ -186,7 +186,7 @@ class AuditControllerTest {
     void exportJson_emptyHistoryReturnsEmptyArray() {
         repository = new AuditRepository();
         auditService = new AuditService(repository, new AuditConfig());
-        controller = new AuditController(auditService, csvExportService, jsonExportService);
+        controller = new AuditController(auditService, csvExportService, jsonExportService, new ExportConfig());
 
         var response = controller.exportJson(null, null, null, null, false, null);
         String json = response.getBody();

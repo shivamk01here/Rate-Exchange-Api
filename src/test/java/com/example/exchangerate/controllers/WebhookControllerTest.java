@@ -1,6 +1,7 @@
 package com.example.exchangerate.controllers;
 
 import com.example.exchangerate.webhook.Webhook;
+import com.example.exchangerate.webhook.WebhookDeliveryLogRepository;
 import com.example.exchangerate.webhook.WebhookMetricsCollector;
 import com.example.exchangerate.webhook.WebhookRepository;
 import com.example.exchangerate.webhook.WebhookService;
@@ -22,7 +23,7 @@ class WebhookControllerTest {
         WebhookRepository repository = new WebhookRepository();
         WebhookMetricsCollector metricsCollector = new WebhookMetricsCollector();
         WebhookService service = new WebhookService(repository, metricsCollector);
-        controller = new WebhookController(service, metricsCollector);
+        controller = new WebhookController(service, metricsCollector, new WebhookDeliveryLogRepository());
     }
 
     @Test

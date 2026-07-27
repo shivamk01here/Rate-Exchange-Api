@@ -209,7 +209,7 @@ class PortfolioServiceTest {
 
         assertEquals("SUCCESS", valuation.getStatus());
         assertEquals(new BigDecimal("1000"), valuation.getTotalValue());
-        assertEquals("SAME_CURRENCY", valuation.getHoldings().get("USD").getStatus());
+        assertEquals("SAME_CURRENCY", valuation.getHoldingValues().get("USD").getStatus());
     }
 
     @Test

@@ -48,7 +48,7 @@ class ExchangeRateConvertIntegrationTest {
 
         when(currencyCacheService.isSupported("USD")).thenReturn(true);
         when(currencyCacheService.isSupported("EUR")).thenReturn(true);
-        when(batchConfig.getMaxAmount()).thenReturn(1000000L);
+        when(batchConfig.getMaxAmount()).thenReturn(1000000);
         when(orchestrationService.getRate(any())).thenReturn(CompletableFuture.completedFuture(response));
 
         webTestClient.get()
@@ -95,7 +95,7 @@ class ExchangeRateConvertIntegrationTest {
 
         when(currencyCacheService.isSupported("USD")).thenReturn(true);
         when(currencyCacheService.isSupported("EUR")).thenReturn(true);
-        when(batchConfig.getMaxAmount()).thenReturn(1000000L);
+        when(batchConfig.getMaxAmount()).thenReturn(1000000);
         when(orchestrationService.getRate(any())).thenReturn(CompletableFuture.completedFuture(failedResponse));
 
         webTestClient.get()

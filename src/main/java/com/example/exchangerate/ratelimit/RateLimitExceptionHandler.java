@@ -41,11 +41,15 @@ public class RateLimitExceptionHandler implements WebFilter {
                     body.put("retryAfter", entry.getWindowEnd().getEpochSecond());
                 }
 
-                byte[] bytes = objectMapper.writeValueAsBytes(body);
-                DataBuffer buffer = exchange.getResponse().bufferFactory().wrap(bytes);
-                exchange.getResponse().getHeaders().setContentType(MediaType.APPLICATION_JSON);
+                try {
+                    byte[] bytes = objectMapper.writeValueAsBytes(body);
+                    DataBuffer buffer = exchange.getResponse().bufferFactory().wrap(bytes);
+                    exchange.getResponse().getHeaders().setContentType(MediaType.APPLICATION_JSON);
 
-                return exchange.getResponse().writeWith(Mono.just(buffer));
+                    return exchange.getResponse().writeWith(Mono.just(buffer));
+                } catch (Exception e) {
+                    return Mono.empty();
+                }
             }
             return Mono.empty();
         }));

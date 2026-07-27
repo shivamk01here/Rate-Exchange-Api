@@ -1,6 +1,7 @@
 package com.example.exchangerate.controllers;
 
 import com.example.exchangerate.trend.*;
+import com.example.exchangerate.models.ExchangeRateResponse;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.springframework.web.server.ResponseStatusException;

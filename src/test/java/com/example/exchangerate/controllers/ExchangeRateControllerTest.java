@@ -3,6 +3,7 @@ package com.example.exchangerate.controllers;
 import com.example.exchangerate.config.BatchConfig;
 import com.example.exchangerate.models.ConversionQueryParams;
 import com.example.exchangerate.models.CurrencyInfo;
+import com.example.exchangerate.models.ExchangeRateResponse;
 import com.example.exchangerate.models.ProviderCodes;
 import com.example.exchangerate.models.ProviderRateDetail;
 import com.example.exchangerate.models.RateCompareRequest;

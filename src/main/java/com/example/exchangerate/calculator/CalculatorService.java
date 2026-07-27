@@ -39,7 +39,7 @@ public class CalculatorService {
                             .amount(amount)
                             .rate(response.getRate())
                             .convertedAmount(response.getConvertedAmount())
-                            .provider(response.getProvider())
+                            .provider(response.getProviderCode() != null ? response.getProviderCode().name() : null)
                             .favorite(false)
                             .calculatedAt(Instant.now())
                             .build();
