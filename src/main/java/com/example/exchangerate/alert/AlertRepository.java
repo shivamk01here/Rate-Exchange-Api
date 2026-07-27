@@ -28,6 +28,7 @@ public class AlertRepository {
                 .condition(alert.getCondition())
                 .threshold(alert.getThreshold())
                 .email(alert.getEmail())
+                .phone(alert.getPhone())
                 .enabled(alert.isEnabled())
                 .createdAt(alert.getCreatedAt() != null ? alert.getCreatedAt() : java.time.Instant.now())
                 .lastTriggeredAt(alert.getLastTriggeredAt())
