@@ -36,8 +36,17 @@ public class ConversionHistoryRepository {
                 .userAgent(entry.getUserAgent())
                 .build();
 
-        entries.put(id, stored);
-        entryList.add(stored);
+        if (entries.putIfAbsent(id, stored) == null) {
+            entryList.add(stored);
+        } else {
+            entries.put(id, stored);
+            for (int i = 0; i < entryList.size(); i++) {
+                if (id.equals(entryList.get(i).getId())) {
+                    entryList.set(i, stored);
+                    break;
+                }
+            }
+        }
 
         log.debug("ConversionHistory saved: id={} {}->{} amount={}",
                 id, stored.getFromCurrency(), stored.getToCurrency(), stored.getAmount());
