@@ -107,6 +107,7 @@ public class AlertRepository {
                     .condition(existing.getCondition())
                     .threshold(existing.getThreshold())
                     .email(existing.getEmail())
+                    .phone(existing.getPhone())
                     .enabled(existing.isEnabled())
                     .createdAt(existing.getCreatedAt())
                     .lastTriggeredAt(timestamp)
