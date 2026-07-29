@@ -111,6 +111,12 @@ notification:
     default-provider: CONSOLE
     from: ExchangeRate
 
+alert-history:
+  enabled: true
+  max-page-size: 50
+  max-entries: 5000
+  track-notifications: true
+
 calculator:
   enabled: true
   max-history-size: 100
