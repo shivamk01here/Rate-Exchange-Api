@@ -1,5 +1,6 @@
 package com.example.exchangerate.alert;
 
+import com.example.exchangerate.alerthistory.AlertHistoryService;
 import com.example.exchangerate.models.ExchangeRateRequest;
 import com.example.exchangerate.models.ExchangeRateResponse;
 import com.example.exchangerate.models.ProviderCodes;
@@ -27,6 +28,7 @@ public class AlertEvaluationService {
     private final EmailService emailService;
     private final WhatsAppAlertService whatsAppAlertService;
     private final WebhookDeliveryService webhookDeliveryService;
+    private final AlertHistoryService alertHistoryService;
 
     public void evaluateAllAlerts() {
         List<Alert> enabledAlerts = alertRepository.findEnabledAlerts();
@@ -71,6 +73,7 @@ public class AlertEvaluationService {
             emailService.sendRateAlert(alert, currentRate);
             whatsAppAlertService.sendRateAlert(alert, currentRate);
             webhookDeliveryService.deliverAlertTriggered(alert, currentRate);
+            alertHistoryService.recordTrigger(alert, currentRate);
             alertRepository.updateLastTriggered(alert.getId(), Instant.now());
         }
     }
@@ -89,6 +92,7 @@ public class AlertEvaluationService {
                 emailService.sendRateAlert(alert, response.getRate());
                 whatsAppAlertService.sendRateAlert(alert, response.getRate());
                 webhookDeliveryService.deliverAlertTriggered(alert, response.getRate());
+                alertHistoryService.recordTrigger(alert, response.getRate());
                 alertRepository.updateLastTriggered(alert.getId(), Instant.now());
             }
         }
