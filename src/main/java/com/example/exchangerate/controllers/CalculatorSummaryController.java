@@ -1,5 +1,7 @@
-package com.example.exchangerate.calculator;
+package com.example.exchangerate.controllers;
 
+import com.example.exchangerate.calculator.CalculatorSummary;
+import com.example.exchangerate.calculator.CalculatorSummaryService;
 import com.example.exchangerate.config.CalculatorConfig;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;

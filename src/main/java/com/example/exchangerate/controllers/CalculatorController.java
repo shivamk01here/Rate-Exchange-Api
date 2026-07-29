@@ -1,5 +1,7 @@
-package com.example.exchangerate.calculator;
+package com.example.exchangerate.controllers;
 
+import com.example.exchangerate.calculator.CalculatorHistory;
+import com.example.exchangerate.calculator.CalculatorService;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.HttpStatus;

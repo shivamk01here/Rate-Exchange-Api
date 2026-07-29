@@ -2,7 +2,7 @@ package com.example.exchangerate.controllers;
 
 import com.example.exchangerate.config.BatchConfig;
 import com.example.exchangerate.history.ConversionHistoryEntry;
-import com.example.exchangerate.history.ConversionHistoryConfig;
+import com.example.exchangerate.config.ConversionHistoryConfig;
 import com.example.exchangerate.history.ConversionHistoryService;
 import com.example.exchangerate.models.BatchConversionRequest;
 import com.example.exchangerate.models.BatchConversionResponse;

@@ -1,6 +1,9 @@
 package com.example.exchangerate.controllers;
 
 import com.example.exchangerate.config.BatchConfig;
+import com.example.exchangerate.config.ConversionHistoryConfig;
+import com.example.exchangerate.history.ConversionHistoryRepository;
+import com.example.exchangerate.history.ConversionHistoryService;
 import com.example.exchangerate.models.ConversionQueryParams;
 import com.example.exchangerate.models.CurrencyInfo;
 import com.example.exchangerate.models.ExchangeRateResponse;
@@ -37,7 +40,9 @@ class ExchangeRateControllerTest {
         CurrencyService currencyService = new CurrencyService();
         currencyCacheService = new CurrencyCacheService(currencyService, new CurrencyMetricsCollector());
         BatchConfig batchConfig = new BatchConfig();
-        controller = new ExchangeRateController(orchestrationService, currencyCacheService, batchConfig);
+        ConversionHistoryConfig historyConfig = new ConversionHistoryConfig();
+        ConversionHistoryService historyService = new ConversionHistoryService(new ConversionHistoryRepository(), historyConfig);
+        controller = new ExchangeRateController(orchestrationService, currencyCacheService, batchConfig, historyService, historyConfig);
     }
 
     @Test
