@@ -7,8 +7,13 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 
 import java.math.BigDecimal;
+import java.time.Instant;
+import java.time.temporal.ChronoUnit;
+import java.util.AbstractMap;
 import java.util.List;
+import java.util.Map;
 import java.util.Optional;
+import java.util.stream.Collectors;
 
 @Slf4j
 @Service
@@ -72,6 +77,42 @@ public class AlertHistoryService {
 
     public long getCountByAlertId(String alertId) {
         return alertHistoryRepository.countByAlertId(alertId);
+    }
+
+    public AlertHistoryStats getStats() {
+        List<AlertHistoryEntry> all = alertHistoryRepository.findAll();
+        Instant now = Instant.now();
+
+        Map<String, Long> pairCounts = all.stream()
+                .collect(Collectors.groupingBy(
+                        e -> e.getFromCurrency() + "/" + e.getToCurrency(),
+                        Collectors.counting()));
+
+        List<Map.Entry<String, Long>> topPairs = pairCounts.entrySet().stream()
+                .sorted(Map.Entry.<String, Long>comparingByValue().reversed()
+                        .thenComparing(Map.Entry.comparingByKey()))
+                .limit(config.getStatsTopPairsLimit())
+                .map(e -> new AbstractMap.SimpleImmutableEntry<>(e.getKey(), e.getValue()))
+                .collect(Collectors.toList());
+
+        return AlertHistoryStats.builder()
+                .totalTriggers(all.size())
+                .uniqueAlerts(all.stream().map(AlertHistoryEntry::getAlertId).distinct().count())
+                .uniqueCurrencyPairs(pairCounts.size())
+                .topPairs(topPairs)
+                .triggersLast24h(alertHistoryRepository.countByTriggeredAtAfter(now.minus(24, ChronoUnit.HOURS)))
+                .triggersLast7d(alertHistoryRepository.countByTriggeredAtAfter(now.minus(7, ChronoUnit.DAYS)))
+                .emailSentCount(all.stream().filter(AlertHistoryEntry::isEmailSent).count())
+                .whatsappSentCount(all.stream().filter(AlertHistoryEntry::isWhatsappSent).count())
+                .webhookSentCount(all.stream().filter(AlertHistoryEntry::isWebhookSent).count())
+                .generatedAt(now)
+                .build();
+    }
+
+    public List<AlertHistoryEntry> getRecentTriggers(int hours) {
+        int window = hours > 0 ? hours : config.getRecentWindowHours();
+        Instant cutoff = Instant.now().minus(window, ChronoUnit.HOURS);
+        return alertHistoryRepository.findByTriggeredAtAfter(cutoff);
     }
 
     public void deleteEntry(String id) {
