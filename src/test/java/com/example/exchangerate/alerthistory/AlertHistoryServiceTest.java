@@ -6,6 +6,8 @@ import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 
 import java.math.BigDecimal;
+import java.time.Instant;
+import java.time.temporal.ChronoUnit;
 import java.util.List;
 
 import static org.junit.jupiter.api.Assertions.*;
@@ -234,5 +236,113 @@ class AlertHistoryServiceTest {
         }
 
         assertTrue(alertHistoryService.getTotalCount() <= 5);
+    }
+
+    @Test
+    void getStats_computesTotalsAndTopPairs() {
+        config.setStatsTopPairsLimit(2);
+
+        Alert alert1 = Alert.builder().id("a1")
+                .fromCurrency("USD").toCurrency("EUR")
+                .condition(Alert.AlertCondition.RATE_ABOVE)
+                .threshold(BigDecimal.ONE).email("a@b.com").build();
+        Alert alert2 = Alert.builder().id("a2")
+                .fromCurrency("USD").toCurrency("EUR")
+                .condition(Alert.AlertCondition.RATE_ABOVE)
+                .threshold(BigDecimal.ONE).email("c@d.com").build();
+        Alert alert3 = Alert.builder().id("a3")
+                .fromCurrency("GBP").toCurrency("USD")
+                .condition(Alert.AlertCondition.RATE_ABOVE)
+                .threshold(BigDecimal.ONE).email("e@f.com").build();
+
+        alertHistoryService.recordTrigger(alert1, new BigDecimal("1.10"));
+        alertHistoryService.recordTrigger(alert2, new BigDecimal("1.12"));
+        alertHistoryService.recordTrigger(alert3, new BigDecimal("1.30"));
+
+        AlertHistoryStats stats = alertHistoryService.getStats();
+
+        assertEquals(3, stats.getTotalTriggers());
+        assertEquals(3, stats.getUniqueAlerts());
+        assertEquals(2, stats.getUniqueCurrencyPairs());
+        assertEquals(2, stats.getTopPairs().size());
+        assertEquals("USD/EUR", stats.getTopPairs().get(0).getKey());
+        assertEquals(2L, stats.getTopPairs().get(0).getValue());
+        assertEquals(3, stats.getEmailSentCount());
+        assertEquals(0, stats.getWhatsappSentCount());
+        assertNotNull(stats.getGeneratedAt());
+    }
+
+    @Test
+    void getStats_whenEmpty_returnsZeros() {
+        AlertHistoryStats stats = alertHistoryService.getStats();
+
+        assertEquals(0, stats.getTotalTriggers());
+        assertEquals(0, stats.getUniqueAlerts());
+        assertEquals(0, stats.getUniqueCurrencyPairs());
+        assertTrue(stats.getTopPairs().isEmpty());
+    }
+
+    @Test
+    void getStats_countsTriggersInLast24Hours() {
+        Alert alert = Alert.builder().id("a1")
+                .fromCurrency("USD").toCurrency("INR")
+                .condition(Alert.AlertCondition.RATE_ABOVE)
+                .threshold(new BigDecimal("80")).email("a@b.com").build();
+        alertHistoryService.recordTrigger(alert, new BigDecimal("82.00"));
+        alertHistoryService.recordTrigger(alert, new BigDecimal("83.00"));
+
+        AlertHistoryStats stats = alertHistoryService.getStats();
+
+        assertEquals(2, stats.getTriggersLast24h());
+        assertEquals(2, stats.getTriggersLast7d());
+    }
+
+    @Test
+    void getRecentTriggers_filtersByWindow() {
+        Alert alert = Alert.builder().id("a1")
+                .fromCurrency("USD").toCurrency("EUR")
+                .condition(Alert.AlertCondition.RATE_ABOVE)
+                .threshold(BigDecimal.ONE).email("a@b.com").build();
+        alertHistoryService.recordTrigger(alert, new BigDecimal("1.10"));
+
+        AlertHistoryEntry oldEntry = AlertHistoryEntry.builder()
+                .alertId("a1")
+                .fromCurrency("USD").toCurrency("EUR")
+                .condition(Alert.AlertCondition.RATE_ABOVE)
+                .threshold(BigDecimal.ONE).email("a@b.com")
+                .triggeredRate(new BigDecimal("1.00"))
+                .triggeredAt(Instant.now().minus(47, ChronoUnit.HOURS))
+                .build();
+        alertHistoryRepository.save(oldEntry);
+
+        List<AlertHistoryEntry> last24h = alertHistoryService.getRecentTriggers(24);
+
+        assertEquals(1, last24h.size());
+        assertEquals(alert.getId(), last24h.get(0).getAlertId());
+    }
+
+    @Test
+    void getRecentTriggers_defaultsToConfigWindow() {
+        config.setRecentWindowHours(48);
+
+        Alert alert = Alert.builder().id("a1")
+                .fromCurrency("USD").toCurrency("EUR")
+                .condition(Alert.AlertCondition.RATE_ABOVE)
+                .threshold(BigDecimal.ONE).email("a@b.com").build();
+        alertHistoryService.recordTrigger(alert, new BigDecimal("1.10"));
+
+        AlertHistoryEntry oldEntry = AlertHistoryEntry.builder()
+                .alertId("a1")
+                .fromCurrency("USD").toCurrency("EUR")
+                .condition(Alert.AlertCondition.RATE_ABOVE)
+                .threshold(BigDecimal.ONE).email("a@b.com")
+                .triggeredRate(new BigDecimal("1.00"))
+                .triggeredAt(Instant.now().minus(47, ChronoUnit.HOURS))
+                .build();
+        alertHistoryRepository.save(oldEntry);
+
+        List<AlertHistoryEntry> result = alertHistoryService.getRecentTriggers(0);
+
+        assertEquals(2, result.size());
     }
 }
