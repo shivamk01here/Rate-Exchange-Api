@@ -91,6 +91,19 @@ public class AlertHistoryRepository {
                 .collect(Collectors.toList());
     }
 
+    public List<AlertHistoryEntry> findByTriggeredAtAfter(java.time.Instant cutoff) {
+        return entryList.stream()
+                .filter(e -> e.getTriggeredAt().isAfter(cutoff))
+                .sorted(Comparator.comparing(AlertHistoryEntry::getTriggeredAt).reversed())
+                .collect(Collectors.toList());
+    }
+
+    public long countByTriggeredAtAfter(java.time.Instant cutoff) {
+        return entryList.stream()
+                .filter(e -> e.getTriggeredAt().isAfter(cutoff))
+                .count();
+    }
+
     public long count() {
         return entries.size();
     }
