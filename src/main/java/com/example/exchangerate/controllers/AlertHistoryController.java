@@ -2,6 +2,7 @@ package com.example.exchangerate.controllers;
 
 import com.example.exchangerate.alerthistory.AlertHistoryEntry;
 import com.example.exchangerate.alerthistory.AlertHistoryService;
+import com.example.exchangerate.alerthistory.AlertHistoryStats;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.HttpStatus;
@@ -52,6 +53,17 @@ public class AlertHistoryController {
             return Map.of("count", alertHistoryService.getCountByAlertId(alertId));
         }
         return Map.of("count", alertHistoryService.getTotalCount());
+    }
+
+    @GetMapping("/stats")
+    public AlertHistoryStats getStats() {
+        return alertHistoryService.getStats();
+    }
+
+    @GetMapping("/recent")
+    public List<AlertHistoryEntry> getRecentTriggers(
+            @RequestParam(defaultValue = "0") int hours) {
+        return alertHistoryService.getRecentTriggers(hours);
     }
 
     @DeleteMapping("/{id}")
