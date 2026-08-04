@@ -116,6 +116,8 @@ alert-history:
   max-page-size: 50
   max-entries: 5000
   track-notifications: true
+  stats-top-pairs-limit: 5
+  recent-window-hours: 24
 
 calculator:
   enabled: true

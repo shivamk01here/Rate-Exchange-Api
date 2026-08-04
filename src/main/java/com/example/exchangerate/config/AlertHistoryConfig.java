@@ -13,4 +13,6 @@ public class AlertHistoryConfig {
     private int maxPageSize = 50;
     private int maxEntries = 5000;
     private boolean trackNotifications = true;
+    private int statsTopPairsLimit = 5;
+    private int recentWindowHours = 24;
 }
