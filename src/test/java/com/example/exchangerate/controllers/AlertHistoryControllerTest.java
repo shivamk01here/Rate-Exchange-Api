@@ -4,6 +4,7 @@ import com.example.exchangerate.alert.Alert;
 import com.example.exchangerate.alerthistory.AlertHistoryEntry;
 import com.example.exchangerate.alerthistory.AlertHistoryRepository;
 import com.example.exchangerate.alerthistory.AlertHistoryService;
+import com.example.exchangerate.alerthistory.AlertHistoryStats;
 import com.example.exchangerate.config.AlertHistoryConfig;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -124,5 +125,38 @@ class AlertHistoryControllerTest {
 
         assertEquals("cleared", result.get("status"));
         assertEquals(0, controller.getAllEntries(0, 100).size());
+    }
+
+    @Test
+    void getStats_returnsAggregatedStats() {
+        createTrigger("a1", "USD", "EUR", BigDecimal.ONE);
+        createTrigger("a1", "USD", "INR", BigDecimal.TEN);
+        createTrigger("a2", "USD", "INR", BigDecimal.TEN);
+
+        AlertHistoryStats stats = controller.getStats();
+
+        assertEquals(3, stats.getTotalTriggers());
+        assertEquals(2, stats.getUniqueAlerts());
+        assertEquals(2, stats.getUniqueCurrencyPairs());
+        assertEquals("USD/INR", stats.getTopPairs().get(0).getKey());
+        assertEquals(2L, stats.getTopPairs().get(0).getValue());
+    }
+
+    @Test
+    void getStats_whenEmpty_returnsEmptyStats() {
+        AlertHistoryStats stats = controller.getStats();
+
+        assertEquals(0, stats.getTotalTriggers());
+        assertTrue(stats.getTopPairs().isEmpty());
+    }
+
+    @Test
+    void getRecentTriggers_returnsEntriesWithinWindow() {
+        createTrigger("a1", "USD", "EUR", BigDecimal.ONE);
+        createTrigger("a1", "USD", "INR", BigDecimal.TEN);
+
+        List<AlertHistoryEntry> recent = controller.getRecentTriggers(24);
+
+        assertEquals(2, recent.size());
     }
 }
