@@ -330,6 +330,42 @@ curl http://localhost:8080/api/history/recent-activity?hours=24
 }
 ```
 
+### Alert History
+
+| Method | Path | Description |
+|--------|------|-------------|
+| GET | `/api/alerts/history?page=&size=` | Get paginated alert trigger history |
+| GET | `/api/alerts/history/{id}` | Get alert history entry by ID |
+| GET | `/api/alerts/history/by-alert?alertId=` | Get history entries for an alert |
+| GET | `/api/alerts/history/by-pair?from=&to=` | Get history entries by currency pair |
+| GET | `/api/alerts/history/count?alertId=` | Get total or alert-specific trigger count |
+| GET | `/api/alerts/history/stats` | Get aggregated alert history statistics |
+| GET | `/api/alerts/history/recent?hours=` | Get triggers from the last N hours |
+| DELETE | `/api/alerts/history/{id}` | Delete a history entry |
+| DELETE | `/api/alerts/history` | Clear all alert history |
+
+#### Example: Get Alert History Statistics
+```bash
+curl http://localhost:8080/api/alerts/history/stats
+```
+```json
+{
+  "totalTriggers": 42,
+  "uniqueAlerts": 7,
+  "uniqueCurrencyPairs": 4,
+  "topPairs": [
+    { "key": "USD/INR", "value": 25 },
+    { "key": "EUR/GBP", "value": 10 }
+  ],
+  "triggersLast24h": 5,
+  "triggersLast7d": 30,
+  "emailSentCount": 42,
+  "whatsappSentCount": 30,
+  "webhookSentCount": 42,
+  "generatedAt": "2026-08-04T10:30:00Z"
+}
+```
+
 ## Rate Trend Tracking
 
 The API automatically tracks exchange rate changes over time and provides trend analysis for any currency pair.
