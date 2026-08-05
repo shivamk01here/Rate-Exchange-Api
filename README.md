@@ -341,6 +341,7 @@ curl http://localhost:8080/api/history/recent-activity?hours=24
 | GET | `/api/alerts/history/count?alertId=` | Get total or alert-specific trigger count |
 | GET | `/api/alerts/history/stats` | Get aggregated alert history statistics |
 | GET | `/api/alerts/history/recent?hours=` | Get triggers from the last N hours |
+| GET | `/api/alerts/history/top-alerts?limit=` | Get alerts ranked by trigger count |
 | DELETE | `/api/alerts/history/{id}` | Delete a history entry |
 | DELETE | `/api/alerts/history` | Clear all alert history |
 
