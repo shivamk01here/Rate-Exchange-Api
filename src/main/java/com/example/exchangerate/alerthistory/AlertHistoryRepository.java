@@ -6,6 +6,7 @@ import org.springframework.stereotype.Component;
 import java.util.ArrayList;
 import java.util.Comparator;
 import java.util.List;
+import java.util.Map;
 import java.util.Optional;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.CopyOnWriteArrayList;
@@ -112,6 +113,11 @@ public class AlertHistoryRepository {
         return entryList.stream()
                 .filter(e -> alertId.equals(e.getAlertId()))
                 .count();
+    }
+
+    public Map<String, Long> countTriggersByAlertId() {
+        return entryList.stream()
+                .collect(Collectors.groupingBy(AlertHistoryEntry::getAlertId, Collectors.counting()));
     }
 
     public void deleteById(String id) {
