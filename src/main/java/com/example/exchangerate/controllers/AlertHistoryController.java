@@ -66,6 +66,12 @@ public class AlertHistoryController {
         return alertHistoryService.getRecentTriggers(hours);
     }
 
+    @GetMapping("/top-alerts")
+    public List<Map.Entry<String, Long>> getTopAlerts(
+            @RequestParam(defaultValue = "0") int limit) {
+        return alertHistoryService.getTopAlerts(limit);
+    }
+
     @DeleteMapping("/{id}")
     public Map<String, String> deleteEntry(@PathVariable String id) {
         alertHistoryService.deleteEntry(id);
