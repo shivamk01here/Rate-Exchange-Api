@@ -9,6 +9,7 @@ import java.math.BigDecimal;
 import java.time.Instant;
 import java.time.temporal.ChronoUnit;
 import java.util.List;
+import java.util.Map;
 
 import static org.junit.jupiter.api.Assertions.*;
 
@@ -344,5 +345,61 @@ class AlertHistoryServiceTest {
         List<AlertHistoryEntry> result = alertHistoryService.getRecentTriggers(0);
 
         assertEquals(2, result.size());
+    }
+
+    @Test
+    void getTopAlerts_ranksAlertsByTriggerCount() {
+        Alert alert1 = Alert.builder().id("a1")
+                .fromCurrency("USD").toCurrency("EUR")
+                .condition(Alert.AlertCondition.RATE_ABOVE)
+                .threshold(BigDecimal.ONE).email("a@b.com").build();
+        Alert alert2 = Alert.builder().id("a2")
+                .fromCurrency("USD").toCurrency("INR")
+                .condition(Alert.AlertCondition.RATE_ABOVE)
+                .threshold(BigDecimal.ONE).email("c@d.com").build();
+
+        alertHistoryService.recordTrigger(alert1, new BigDecimal("1.10"));
+        alertHistoryService.recordTrigger(alert1, new BigDecimal("1.15"));
+        alertHistoryService.recordTrigger(alert2, new BigDecimal("82.00"));
+
+        List<Map.Entry<String, Long>> top = alertHistoryService.getTopAlerts(0);
+
+        assertEquals(2, top.size());
+        assertEquals("a1", top.get(0).getKey());
+        assertEquals(2L, top.get(0).getValue());
+        assertEquals("a2", top.get(1).getKey());
+        assertEquals(1L, top.get(1).getValue());
+    }
+
+    @Test
+    void getTopAlerts_respectsLimit() {
+        Alert alert1 = Alert.builder().id("a1")
+                .fromCurrency("USD").toCurrency("EUR")
+                .condition(Alert.AlertCondition.RATE_ABOVE)
+                .threshold(BigDecimal.ONE).email("a@b.com").build();
+        Alert alert2 = Alert.builder().id("a2")
+                .fromCurrency("USD").toCurrency("INR")
+                .condition(Alert.AlertCondition.RATE_ABOVE)
+                .threshold(BigDecimal.ONE).email("c@d.com").build();
+        Alert alert3 = Alert.builder().id("a3")
+                .fromCurrency("GBP").toCurrency("USD")
+                .condition(Alert.AlertCondition.RATE_ABOVE)
+                .threshold(BigDecimal.ONE).email("e@f.com").build();
+
+        alertHistoryService.recordTrigger(alert1, new BigDecimal("1.10"));
+        alertHistoryService.recordTrigger(alert2, new BigDecimal("82.00"));
+        alertHistoryService.recordTrigger(alert3, new BigDecimal("1.30"));
+
+        List<Map.Entry<String, Long>> top = alertHistoryService.getTopAlerts(2);
+
+        assertEquals(2, top.size());
+        assertEquals("a1", top.get(0).getKey());
+    }
+
+    @Test
+    void getTopAlerts_whenEmpty_returnsEmptyList() {
+        List<Map.Entry<String, Long>> top = alertHistoryService.getTopAlerts(0);
+
+        assertTrue(top.isEmpty());
     }
 }

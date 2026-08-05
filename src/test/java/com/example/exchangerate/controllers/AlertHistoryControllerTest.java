@@ -159,4 +159,27 @@ class AlertHistoryControllerTest {
 
         assertEquals(2, recent.size());
     }
+
+    @Test
+    void getTopAlerts_returnsRankedAlerts() {
+        createTrigger("a1", "USD", "EUR", BigDecimal.ONE);
+        createTrigger("a1", "USD", "EUR", BigDecimal.ONE);
+        createTrigger("a2", "USD", "INR", BigDecimal.TEN);
+
+        List<Map.Entry<String, Long>> top = controller.getTopAlerts(0);
+
+        assertEquals(2, top.size());
+        assertEquals("a1", top.get(0).getKey());
+        assertEquals(2L, top.get(0).getValue());
+    }
+
+    @Test
+    void getTopAlerts_respectsLimit() {
+        createTrigger("a1", "USD", "EUR", BigDecimal.ONE);
+        createTrigger("a2", "USD", "INR", BigDecimal.TEN);
+
+        List<Map.Entry<String, Long>> top = controller.getTopAlerts(1);
+
+        assertEquals(1, top.size());
+    }
 }
