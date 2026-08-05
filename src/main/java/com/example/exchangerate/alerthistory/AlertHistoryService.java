@@ -115,6 +115,16 @@ public class AlertHistoryService {
         return alertHistoryRepository.findByTriggeredAtAfter(cutoff);
     }
 
+    public List<Map.Entry<String, Long>> getTopAlerts(int limit) {
+        int topLimit = limit > 0 ? limit : config.getStatsTopPairsLimit();
+        return alertHistoryRepository.countTriggersByAlertId().entrySet().stream()
+                .sorted(Map.Entry.<String, Long>comparingByValue().reversed()
+                        .thenComparing(Map.Entry.comparingByKey()))
+                .limit(topLimit)
+                .map(e -> new AbstractMap.SimpleImmutableEntry<>(e.getKey(), e.getValue()))
+                .collect(Collectors.toList());
+    }
+
     public void deleteEntry(String id) {
         alertHistoryRepository.deleteById(id);
         log.info("Alert history entry deleted: id={}", id);
