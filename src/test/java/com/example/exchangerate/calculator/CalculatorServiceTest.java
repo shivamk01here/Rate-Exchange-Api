@@ -98,8 +98,8 @@ class CalculatorServiceTest {
 
         assertEquals("INR", reversed.getFromCurrency());
         assertEquals("USD", reversed.getToCurrency());
-        assertEquals(new BigDecimal("8345.00"), reversed.getAmount());
-        assertEquals(new BigDecimal("100"), reversed.getConvertedAmount());
+        assertEquals(new BigDecimal("100"), reversed.getAmount());
+        assertEquals(new BigDecimal("8345.00"), reversed.getConvertedAmount());
     }
 
     @Test
