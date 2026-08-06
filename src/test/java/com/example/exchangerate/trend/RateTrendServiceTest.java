@@ -58,7 +58,7 @@ class RateTrendServiceTest {
 
         rateTrendService.recordRate(response);
 
-        assertEquals(1, metricsCollector.getStats().get("recordCount"));
+        assertEquals(1L, metricsCollector.getStats().get("recordCount"));
     }
 
     @Test
