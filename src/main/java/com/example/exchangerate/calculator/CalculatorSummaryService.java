@@ -54,6 +54,7 @@ public class CalculatorSummaryService {
         Map<String, Long> pairFrequency = all.stream()
                 .collect(Collectors.groupingBy(
                         h -> h.getFromCurrency() + "/" + h.getToCurrency(),
+                        LinkedHashMap::new,
                         Collectors.counting()));
         String mostUsedPair = pairFrequency.entrySet().stream()
                 .max(Map.Entry.comparingByValue())
