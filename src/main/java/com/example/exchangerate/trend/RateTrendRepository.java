@@ -4,7 +4,6 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Component;
 
 import java.util.ArrayList;
-import java.util.Comparator;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
@@ -12,6 +11,7 @@ import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.CopyOnWriteArrayList;
 import java.util.concurrent.atomic.AtomicLong;
 import java.util.stream.Collectors;
+import java.util.stream.IntStream;
 
 @Slf4j
 @Component
@@ -51,8 +51,14 @@ public class RateTrendRepository {
     }
 
     public List<RateSnapshot> findRecentByCurrencyPair(String from, String to, int limit) {
-        return findByCurrencyPair(from, to).stream()
-                .sorted(Comparator.comparing(RateSnapshot::getTimestamp).reversed())
+        List<RateSnapshot> pairSnapshots = findByCurrencyPair(from, to);
+        return IntStream.range(0, pairSnapshots.size())
+                .boxed()
+                .sorted((i, j) -> {
+                    int cmp = pairSnapshots.get(j).getTimestamp().compareTo(pairSnapshots.get(i).getTimestamp());
+                    return cmp != 0 ? cmp : Integer.compare(j, i);
+                })
+                .map(pairSnapshots::get)
                 .limit(limit)
                 .collect(Collectors.toList());
     }
