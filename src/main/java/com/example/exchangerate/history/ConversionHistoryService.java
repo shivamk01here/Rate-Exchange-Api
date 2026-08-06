@@ -76,7 +76,7 @@ public class ConversionHistoryService {
         List<ConversionHistoryEntry> allEntries = historyRepository.findAll();
         Map<String, Object> stats = new HashMap<>();
 
-        stats.put("totalConversions", allEntries.size());
+        stats.put("totalConversions", (long) allEntries.size());
 
         if (allEntries.isEmpty()) {
             stats.put("averageRate", BigDecimal.ZERO);
@@ -120,7 +120,7 @@ public class ConversionHistoryService {
 
         Map<String, Object> activity = new HashMap<>();
         activity.put("periodHours", hours);
-        activity.put("totalConversions", recent.size());
+        activity.put("totalConversions", (long) recent.size());
 
         long successCount = recent.stream()
                 .filter(e -> "SUCCESS".equals(e.getStatus()))
