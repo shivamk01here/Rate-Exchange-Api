@@ -193,6 +193,7 @@ public class PortfolioService {
                                 Map<String, PortfolioValuation.HoldingValue> holdingValues = new LinkedHashMap<>();
                                 BigDecimal totalValue = BigDecimal.ZERO;
                                 boolean allFailed = true;
+                                boolean anyConverted = false;
 
                                 for (CompletableFuture<PortfolioValuation.HoldingValue> future : futures) {
                                     PortfolioValuation.HoldingValue hv = future.join();
@@ -200,8 +201,15 @@ public class PortfolioService {
                                     if (hv.getConvertedValue() != null) {
                                         totalValue = totalValue.add(hv.getConvertedValue());
                                         allFailed = false;
+                                        if (!"SAME_CURRENCY".equals(hv.getStatus())) {
+                                            anyConverted = true;
+                                        }
                                     }
                                 }
+
+                                BigDecimal finalTotal = anyConverted
+                                        ? totalValue.setScale(4, RoundingMode.HALF_UP)
+                                        : totalValue;
 
                                 return PortfolioValuation.builder()
                                         .portfolioId(id)
@@ -209,7 +217,7 @@ public class PortfolioService {
                                         .baseCurrency(baseCurrency)
                                         .holdings(holdings)
                                         .holdingValues(holdingValues)
-                                        .totalValue(totalValue.setScale(4, RoundingMode.HALF_UP))
+                                        .totalValue(finalTotal)
                                         .status(allFailed ? "FAILED" : "SUCCESS")
                                         .valuedAt(Instant.now())
                                         .build();
