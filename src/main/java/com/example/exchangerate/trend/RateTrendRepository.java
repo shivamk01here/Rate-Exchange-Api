@@ -41,9 +41,13 @@ public class RateTrendRepository {
     }
 
     public Optional<RateSnapshot> findLatestByCurrencyPair(String from, String to) {
-        List<RateSnapshot> pairSnapshots = findByCurrencyPair(from, to);
-        return pairSnapshots.stream()
-                .max(Comparator.comparing(RateSnapshot::getTimestamp));
+        RateSnapshot latest = null;
+        for (RateSnapshot snapshot : findByCurrencyPair(from, to)) {
+            if (latest == null || !snapshot.getTimestamp().isBefore(latest.getTimestamp())) {
+                latest = snapshot;
+            }
+        }
+        return Optional.ofNullable(latest);
     }
 
     public List<RateSnapshot> findRecentByCurrencyPair(String from, String to, int limit) {
