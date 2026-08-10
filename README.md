@@ -31,6 +31,26 @@ Multi-provider exchange rate API built with Spring Boot 2.7 & WebFlux, inspired 
 | GET | `/api/currencies/symbols/{code}` | Get symbol for a currency code |
 | GET | `/api/currencies/symbols/check?symbol=` | Check if a symbol is known |
 
+### Currency Nicknames
+
+| Method | Path | Description |
+|--------|------|-------------|
+| POST | `/api/currency-nicknames` | Give a currency code a friendly nickname |
+| GET | `/api/currency-nicknames` | List all nicknames |
+| GET | `/api/currency-nicknames/{id}` | Get nickname by ID |
+| GET | `/api/currency-nicknames/by-code?code=` | Find nicknames by currency code |
+| GET | `/api/currency-nicknames/by-nickname?nickname=` | Find nicknames by nickname |
+| PUT | `/api/currency-nicknames/{id}` | Update a nickname |
+| DELETE | `/api/currency-nicknames/{id}` | Delete a nickname |
+| GET | `/api/currency-nicknames/count` | Get total nickname count |
+
+#### Example: Create a Nickname
+```bash
+curl -X POST http://localhost:8080/api/currency-nicknames \
+  -H "Content-Type: application/json" \
+  -d '{"currencyCode": "USD", "nickname": "bucks"}'
+```
+
 ### Alerts
 
 | Method | Path | Description |
