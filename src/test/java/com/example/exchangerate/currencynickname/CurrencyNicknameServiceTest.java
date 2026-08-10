@@ -96,6 +96,16 @@ class CurrencyNicknameServiceTest {
     }
 
     @Test
+    void createNickname_normalizesCodeToUppercase() {
+        CurrencyNickname created = nicknameService.createNickname(CurrencyNickname.builder()
+                .currencyCode("usd")
+                .nickname("bucks")
+                .build());
+
+        assertEquals("USD", created.getCurrencyCode());
+    }
+
+    @Test
     void getNicknameCount_returnsCorrectCount() {
         assertEquals(0, nicknameService.getNicknameCount());
 

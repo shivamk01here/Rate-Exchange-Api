@@ -23,7 +23,7 @@ public class CurrencyNicknameRepository {
         String id = nickname.getId() != null ? nickname.getId() : String.valueOf(idCounter.incrementAndGet());
         CurrencyNickname stored = CurrencyNickname.builder()
                 .id(id)
-                .currencyCode(nickname.getCurrencyCode())
+                .currencyCode(nickname.getCurrencyCode() != null ? nickname.getCurrencyCode().toUpperCase() : null)
                 .nickname(nickname.getNickname())
                 .createdAt(nickname.getCreatedAt() != null ? nickname.getCreatedAt() : java.time.Instant.now())
                 .build();
