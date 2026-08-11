@@ -51,6 +51,34 @@ curl -X POST http://localhost:8080/api/currency-nicknames \
   -d '{"currencyCode": "USD", "nickname": "bucks"}'
 ```
 
+### Currency Groups
+
+| Method | Path | Description |
+|--------|------|-------------|
+| POST | `/api/currency-groups` | Create a named group of currency pairs |
+| GET | `/api/currency-groups` | List all groups |
+| GET | `/api/currency-groups/{id}` | Get group by ID |
+| GET | `/api/currency-groups/by-name?name=` | Find groups by name |
+| GET | `/api/currency-groups/by-pair?from=&to=` | Find groups containing a pair |
+| PUT | `/api/currency-groups/{id}` | Update a group |
+| DELETE | `/api/currency-groups/{id}` | Delete a group |
+| POST | `/api/currency-groups/{id}/pairs` | Add a pair to a group |
+| DELETE | `/api/currency-groups/{id}/pairs/{from}/{to}` | Remove a pair from a group |
+| GET | `/api/currency-groups/count` | Get total group count |
+
+#### Example: Create a Group and Add Pairs
+```bash
+# Create
+curl -X POST http://localhost:8080/api/currency-groups \
+  -H "Content-Type: application/json" \
+  -d '{"name": "Travel", "description": "currencies for the trip"}'
+
+# Add a pair
+curl -X POST http://localhost:8080/api/currency-groups/1/pairs \
+  -H "Content-Type: application/json" \
+  -d '{"fromCurrency": "USD", "toCurrency": "INR"}'
+```
+
 ### Alerts
 
 | Method | Path | Description |
