@@ -130,13 +130,16 @@ public class CalculatorService {
                     if (existing.getConvertedAmount() == null || existing.getRate() == null) {
                         throw new IllegalArgumentException("Cannot reverse: missing rate or converted amount");
                     }
+                    if (existing.getRate().compareTo(BigDecimal.ZERO) == 0) {
+                        throw new IllegalArgumentException("Cannot reverse: rate is zero");
+                    }
                     BigDecimal reverseRate = BigDecimal.ONE.divide(existing.getRate(), SCALE, RoundingMode.HALF_UP);
                     CalculatorHistory reversed = CalculatorHistory.builder()
                             .fromCurrency(existing.getToCurrency())
                             .toCurrency(existing.getFromCurrency())
-                            .amount(existing.getAmount())
+                            .amount(existing.getConvertedAmount())
                             .rate(reverseRate)
-                            .convertedAmount(existing.getConvertedAmount())
+                            .convertedAmount(existing.getAmount())
                             .provider(existing.getProvider())
                             .favorite(false)
                             .calculatedAt(Instant.now())

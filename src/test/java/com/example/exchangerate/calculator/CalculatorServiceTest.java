@@ -98,8 +98,20 @@ class CalculatorServiceTest {
 
         assertEquals("INR", reversed.getFromCurrency());
         assertEquals("USD", reversed.getToCurrency());
-        assertEquals(new BigDecimal("100"), reversed.getAmount());
-        assertEquals(new BigDecimal("8345.00"), reversed.getConvertedAmount());
+        assertEquals(new BigDecimal("8345.00"), reversed.getAmount());
+        assertEquals(new BigDecimal("100"), reversed.getConvertedAmount());
+    }
+
+    @Test
+    void reverse_throwsWhenRateIsZero() {
+        CalculatorHistory saved = historyRepository.save(CalculatorHistory.builder()
+                .fromCurrency("USD").toCurrency("INR")
+                .amount(new BigDecimal("100"))
+                .rate(BigDecimal.ZERO)
+                .convertedAmount(new BigDecimal("0.00"))
+                .provider("EXCHANGE_RATE_API").build());
+
+        assertThrows(IllegalArgumentException.class, () -> calculatorService.reverse(saved.getId()));
     }
 
     @Test

@@ -120,7 +120,7 @@ class CalculatorControllerTest {
 
         assertEquals("INR", reversed.getFromCurrency());
         assertEquals("USD", reversed.getToCurrency());
-        assertEquals(new BigDecimal("100"), reversed.getAmount());
+        assertEquals(new BigDecimal("8345.00"), reversed.getAmount());
     }
 
     @Test
