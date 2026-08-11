@@ -65,8 +65,11 @@ public class FavoritePairRepository {
     }
 
     public List<FavoritePair> findByLabel(String label) {
+        if (label == null) {
+            return List.of();
+        }
         return favoriteList.stream()
-                .filter(f -> label.equalsIgnoreCase(f.getLabel()))
+                .filter(f -> f.getLabel() != null && label.equalsIgnoreCase(f.getLabel()))
                 .collect(Collectors.toList());
     }
 

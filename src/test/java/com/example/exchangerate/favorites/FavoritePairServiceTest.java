@@ -140,6 +140,19 @@ class FavoritePairServiceTest {
     }
 
     @Test
+    void getFavoritesByLabel_skipsFavoritesWithoutLabel() {
+        favoritePairService.createFavorite(FavoritePair.builder()
+                .fromCurrency("USD").toCurrency("GBP").label("Work").build());
+        favoritePairService.createFavorite(FavoritePair.builder()
+                .fromCurrency("EUR").toCurrency("GBP").build());
+
+        List<FavoritePair> byLabel = favoritePairService.getFavoritesByLabel("Work");
+
+        assertEquals(1, byLabel.size());
+        assertEquals(0, favoritePairService.getFavoritesByLabel(null).size());
+    }
+
+    @Test
     void getFavoriteCount_returnsCorrectCount() {
         assertEquals(0, favoritePairService.getFavoriteCount());
 
