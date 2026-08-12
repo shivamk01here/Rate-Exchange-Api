@@ -79,6 +79,29 @@ curl -X POST http://localhost:8080/api/currency-groups/1/pairs \
   -d '{"fromCurrency": "USD", "toCurrency": "INR"}'
 ```
 
+### Recent Currency Pairs
+
+| Method | Path | Description |
+|--------|------|-------------|
+| POST | `/api/recent-pairs/record?from=&to=` | Record a currency pair usage |
+| GET | `/api/recent-pairs` | List pairs, newest first |
+| GET | `/api/recent-pairs/by-pair?from=&to=` | Get a specific pair |
+| GET | `/api/recent-pairs/top?limit=` | Get most recently used pairs |
+| GET | `/api/recent-pairs/most-used?limit=` | Get pairs ranked by usage count |
+| DELETE | `/api/recent-pairs/by-pair?from=&to=` | Delete a pair |
+| DELETE | `/api/recent-pairs/clear` | Clear all tracked pairs |
+| GET | `/api/recent-pairs/count` | Get total tracked pair count |
+
+#### Example: Record and Query Pairs
+```bash
+# Record usage
+curl -X POST "http://localhost:8080/api/recent-pairs/record?from=USD&to=INR"
+
+# Most used pairs
+curl "http://localhost:8080/api/recent-pairs/most-used?limit=5"
+```
+Repeatedly recording the same pair bumps its `useCount` and refreshes `lastUsedAt`.
+
 ### Alerts
 
 | Method | Path | Description |
