@@ -62,14 +62,16 @@ public class ConversionHistoryRepository {
     }
 
     public List<ConversionHistoryEntry> findAll(int page, int size) {
+        int safePage = Math.max(page, 0);
+        int safeSize = Math.max(size, 1);
         List<ConversionHistoryEntry> sorted = entryList.stream()
                 .sorted(Comparator.comparing(ConversionHistoryEntry::getTimestamp).reversed())
                 .collect(Collectors.toList());
-        int start = page * size;
+        int start = safePage * safeSize;
         if (start >= sorted.size()) {
             return new ArrayList<>();
         }
-        int end = Math.min(start + size, sorted.size());
+        int end = Math.min(start + safeSize, sorted.size());
         return new ArrayList<>(sorted.subList(start, end));
     }
 
