@@ -73,7 +73,7 @@ class TrendingPairServiceTest {
 
     @Test
     void getTrendingPairsSince_filtersByWindow() {
-        Instant now = Instant.parse("2026-08-05T10:00:00Z");
+        Instant now = Instant.now();
         record("USD", "INR", new BigDecimal("100"), now.minusSeconds(3600));
         record("EUR", "GBP", new BigDecimal("200"), now.minusSeconds(60 * 60 * 48));
 
