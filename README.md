@@ -102,6 +102,25 @@ curl "http://localhost:8080/api/recent-pairs/most-used?limit=5"
 ```
 Repeatedly recording the same pair bumps its `useCount` and refreshes `lastUsedAt`.
 
+### Trending Pairs
+
+| Method | Path | Description |
+|--------|------|-------------|
+| GET | `/api/trending-pairs?limit=` | Pairs ranked by total converted volume |
+| GET | `/api/trending-pairs/by-count?limit=` | Pairs ranked by number of conversions |
+| GET | `/api/trending-pairs/recent?hours=&limit=` | Trending pairs within the last N hours |
+| GET | `/api/trending-pairs/count` | Number of distinct pairs seen |
+
+#### Example: Query Trending Pairs
+```bash
+# Top pairs by volume
+curl "http://localhost:8080/api/trending-pairs?limit=5"
+
+# Trending within the last 24 hours
+curl "http://localhost:8080/api/trending-pairs/recent?hours=24&limit=5"
+```
+Trending pairs are computed on the fly from the conversion history.
+
 ### Alerts
 
 | Method | Path | Description |
