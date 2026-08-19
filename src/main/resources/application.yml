@@ -128,3 +128,8 @@ calculator:
   summary-enabled: true
   summary-top-pairs-limit: 5
   summary-top-providers-limit: 5
+
+conversion-notes:
+  enabled: true
+  max-notes: 200
+  max-note-length: 500
