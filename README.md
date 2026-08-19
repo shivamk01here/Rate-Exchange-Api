@@ -318,6 +318,25 @@ curl -X POST http://localhost:8080/api/bookmarks \
 curl -X POST http://localhost:8080/api/bookmarks/1/execute
 ```
 
+### Conversion Notes
+
+| Method | Path | Description |
+|--------|------|-------------|
+| POST | `/api/notes` | Create a note for a currency pair |
+| GET | `/api/notes` | List all notes |
+| GET | `/api/notes/{id}` | Get note by ID |
+| GET | `/api/notes/by-pair?from=&to=` | Find notes by currency pair |
+| PUT | `/api/notes/{id}` | Update a note |
+| DELETE | `/api/notes/{id}` | Delete a note |
+| GET | `/api/notes/count` | Get total note count |
+
+#### Example: Add a Note
+```bash
+curl -X POST http://localhost:8080/api/notes \
+  -H "Content-Type: application/json" \
+  -d '{"fromCurrency": "USD", "toCurrency": "INR", "noteText": "Check this rate before the trip"}'
+```
+
 ### Currency Calculator
 
 | Method | Path | Description |
