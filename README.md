@@ -337,6 +337,28 @@ curl -X POST http://localhost:8080/api/notes \
   -d '{"fromCurrency": "USD", "toCurrency": "INR", "noteText": "Check this rate before the trip"}'
 ```
 
+### Rate Aliases
+
+| Method | Path | Description |
+|--------|------|-------------|
+| POST | `/api/aliases` | Create an alias for a currency pair |
+| GET | `/api/aliases` | List all aliases |
+| GET | `/api/aliases/{id}` | Get alias by ID |
+| GET | `/api/aliases/lookup?name=` | Look up a pair by alias name |
+| DELETE | `/api/aliases/{id}` | Delete an alias |
+| GET | `/api/aliases/count` | Get total alias count |
+
+#### Example: Create and Look Up an Alias
+```bash
+# Create
+curl -X POST http://localhost:8080/api/aliases \
+  -H "Content-Type: application/json" \
+  -d '{"alias": "dollar", "fromCurrency": "USD", "toCurrency": "INR"}'
+
+# Look up
+curl "http://localhost:8080/api/aliases/lookup?name=dollar"
+```
+
 ### Currency Calculator
 
 | Method | Path | Description |
