@@ -133,3 +133,8 @@ conversion-notes:
   enabled: true
   max-notes: 200
   max-note-length: 500
+
+watchlist:
+  enabled: true
+  max-entries: 50
+  max-label-length: 100
