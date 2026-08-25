@@ -6,6 +6,7 @@ import lombok.Data;
 import lombok.NoArgsConstructor;
 
 import javax.validation.constraints.NotBlank;
+import javax.validation.constraints.NotNull;
 import javax.validation.constraints.Size;
 import java.time.Instant;
 
@@ -28,7 +29,8 @@ public class WatchlistEntry {
     @Size(max = 100, message = "Label must not exceed 100 characters")
     private String label;
 
-    private String priority;
+    @NotNull(message = "Priority is required")
+    private WatchlistPriority priority;
 
     private boolean enabled;
 

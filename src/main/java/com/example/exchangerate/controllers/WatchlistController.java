@@ -1,6 +1,7 @@
 package com.example.exchangerate.controllers;
 
 import com.example.exchangerate.watchlist.WatchlistEntry;
+import com.example.exchangerate.watchlist.WatchlistPriority;
 import com.example.exchangerate.watchlist.WatchlistService;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -44,7 +45,7 @@ public class WatchlistController {
     }
 
     @GetMapping("/by-priority")
-    public List<WatchlistEntry> getEntriesByPriority(@RequestParam String priority) {
+    public List<WatchlistEntry> getEntriesByPriority(@RequestParam WatchlistPriority priority) {
         return watchlistService.getEntriesByPriority(priority);
     }
 

@@ -63,9 +63,9 @@ public class WatchlistRepository {
                 .collect(Collectors.toList());
     }
 
-    public List<WatchlistEntry> findByPriority(String priority) {
+    public List<WatchlistEntry> findByPriority(WatchlistPriority priority) {
         return entryList.stream()
-                .filter(e -> priority.equalsIgnoreCase(e.getPriority()))
+                .filter(e -> e.getPriority() == priority)
                 .collect(Collectors.toList());
     }
 

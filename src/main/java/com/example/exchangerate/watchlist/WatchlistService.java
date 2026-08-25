@@ -33,7 +33,7 @@ public class WatchlistService {
         return watchlistRepository.findByCurrencyPair(from, to);
     }
 
-    public List<WatchlistEntry> getEntriesByPriority(String priority) {
+    public List<WatchlistEntry> getEntriesByPriority(WatchlistPriority priority) {
         return watchlistRepository.findByPriority(priority);
     }
 
