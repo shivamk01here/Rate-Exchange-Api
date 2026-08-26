@@ -359,6 +359,30 @@ curl -X POST http://localhost:8080/api/aliases \
 curl "http://localhost:8080/api/aliases/lookup?name=dollar"
 ```
 
+### Currency Watchlist
+
+Track currency pairs you want to monitor with priority levels and labels.
+
+| Method | Path | Description |
+|--------|------|-------------|
+| POST | `/api/watchlist` | Add a pair to the watchlist |
+| GET | `/api/watchlist` | List all watchlist entries |
+| GET | `/api/watchlist/{id}` | Get watchlist entry by ID |
+| GET | `/api/watchlist/by-pair?from=&to=` | Find entries by currency pair |
+| GET | `/api/watchlist/by-priority?priority=` | Find entries by priority (LOW, MEDIUM, HIGH) |
+| GET | `/api/watchlist/enabled` | List only enabled entries |
+| PUT | `/api/watchlist/{id}` | Update a watchlist entry |
+| DELETE | `/api/watchlist/{id}` | Delete a watchlist entry |
+| PATCH | `/api/watchlist/{id}/toggle` | Enable/disable a watchlist entry |
+| GET | `/api/watchlist/count` | Get total watchlist count |
+
+#### Example: Add to Watchlist
+```bash
+curl -X POST http://localhost:8080/api/watchlist \
+  -H "Content-Type: application/json" \
+  -d '{"fromCurrency": "USD", "toCurrency": "INR", "label": "Trip rates", "priority": "HIGH", "enabled": true}'
+```
+
 ### Currency Calculator
 
 | Method | Path | Description |
