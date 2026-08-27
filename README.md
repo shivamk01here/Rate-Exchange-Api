@@ -383,6 +383,28 @@ curl -X POST http://localhost:8080/api/watchlist \
   -d '{"fromCurrency": "USD", "toCurrency": "INR", "label": "Trip rates", "priority": "HIGH", "enabled": true}'
 ```
 
+### Rate Bookmarks
+
+Save a specific exchange rate at a point in time for later reference or comparison.
+
+| Method | Path | Description |
+|--------|------|-------------|
+| POST | `/api/rate-bookmarks` | Save a rate bookmark |
+| GET | `/api/rate-bookmarks` | List all rate bookmarks |
+| GET | `/api/rate-bookmarks/{id}` | Get rate bookmark by ID |
+| GET | `/api/rate-bookmarks/by-pair?from=&to=` | Find bookmarks by currency pair |
+| GET | `/api/rate-bookmarks/by-provider?providerCode=` | Find bookmarks by provider |
+| PUT | `/api/rate-bookmarks/{id}` | Update a rate bookmark |
+| DELETE | `/api/rate-bookmarks/{id}` | Delete a rate bookmark |
+| GET | `/api/rate-bookmarks/count` | Get total rate bookmark count |
+
+#### Example: Save a Rate Bookmark
+```bash
+curl -X POST http://localhost:8080/api/rate-bookmarks \
+  -H "Content-Type: application/json" \
+  -d '{"fromCurrency": "USD", "toCurrency": "INR", "rate": 83.45, "label": "Trip rate", "providerCode": "EXCHANGE_RATE_API"}'
+```
+
 ### Currency Calculator
 
 | Method | Path | Description |
