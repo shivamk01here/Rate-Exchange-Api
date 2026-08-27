@@ -138,3 +138,8 @@ watchlist:
   enabled: true
   max-entries: 50
   max-label-length: 100
+
+rate-bookmarks:
+  enabled: true
+  max-bookmarks: 50
+  max-label-length: 100
