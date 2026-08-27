@@ -7,6 +7,7 @@ import lombok.NoArgsConstructor;
 
 import javax.validation.constraints.NotBlank;
 import javax.validation.constraints.NotNull;
+import javax.validation.constraints.Positive;
 import javax.validation.constraints.Size;
 import java.math.BigDecimal;
 import java.time.Instant;
@@ -28,6 +29,7 @@ public class RateBookmark {
     private String toCurrency;
 
     @NotNull(message = "Rate is required")
+    @Positive(message = "Rate must be a positive number")
     private BigDecimal rate;
 
     @Size(max = 100, message = "Label must not exceed 100 characters")
