@@ -143,3 +143,8 @@ rate-bookmarks:
   enabled: true
   max-bookmarks: 50
   max-label-length: 100
+
+pair-tags:
+  enabled: true
+  max-tags: 200
+  max-tag-length: 50
