@@ -6,6 +6,7 @@ import lombok.Data;
 import lombok.NoArgsConstructor;
 
 import javax.validation.constraints.NotBlank;
+import javax.validation.constraints.Pattern;
 import javax.validation.constraints.Size;
 import java.time.Instant;
 
@@ -27,6 +28,7 @@ public class PairTag {
 
     @NotBlank(message = "Tag is required")
     @Size(max = 50, message = "Tag must not exceed 50 characters")
+    @Pattern(regexp = "^[a-z0-9-_]+$", message = "Tag must contain only lowercase letters, numbers, dashes and underscores")
     private String tag;
 
     private Instant createdAt;
