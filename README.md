@@ -405,6 +405,30 @@ curl -X POST http://localhost:8080/api/rate-bookmarks \
   -d '{"fromCurrency": "USD", "toCurrency": "INR", "rate": 83.45, "label": "Trip rate", "providerCode": "EXCHANGE_RATE_API"}'
 ```
 
+### Currency Pair Tags
+
+Attach labels to currency pairs to categorize and organize them.
+
+| Method | Path | Description |
+|--------|------|-------------|
+| POST | `/api/pair-tags` | Tag a currency pair |
+| GET | `/api/pair-tags` | List all pair tags |
+| GET | `/api/pair-tags/{id}` | Get pair tag by ID |
+| GET | `/api/pair-tags/by-pair?from=&to=` | Find tags by currency pair |
+| GET | `/api/pair-tags/by-tag?tag=` | Find pairs by tag value |
+| GET | `/api/pair-tags/distinct` | List all distinct tags |
+| PUT | `/api/pair-tags/{id}` | Update a pair tag |
+| DELETE | `/api/pair-tags/{id}` | Delete a pair tag |
+| GET | `/api/pair-tags/count` | Get total pair tag count |
+
+#### Example: Tag a Currency Pair
+```bash
+curl -X POST http://localhost:8080/api/pair-tags \
+  -H "Content-Type: application/json" \
+  -d '{"fromCurrency": "USD", "toCurrency": "INR", "tag": "travel"}'
+```
+Tags must be lowercase letters, numbers, dashes or underscores (max 50 characters).
+
 ### Currency Calculator
 
 | Method | Path | Description |
